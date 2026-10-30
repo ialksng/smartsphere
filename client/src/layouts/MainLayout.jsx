@@ -86,6 +86,7 @@ export default function MainLayout({ children }) {
           <NavItem
             icon={<Settings size={18} />}
             label="Settings"
+            onClick={() => navigate('/settings')}
           />
 
           <NavItem

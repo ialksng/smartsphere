@@ -24,6 +24,7 @@
 - **Active Document Focus:** Open or attach any PDF, DOCX, MD, or TXT file to give the AI primary focus on that specific document while keeping workspace awareness active.
 - **Rich Markdown Formatting:** AI responses render with crisp Markdown typography, bold highlights, formatted tables, code containers, and bullet lists.
 - **Visual File Attachment Cards:** Attached documents appear as visual file cards with format logos (`PDF`, `DOC`, `TXT`) and active context status badges.
+- **Context Detachment Controls:** Remove or detach documents from the AI context on the fly via the input staging bar ("✕ Remove Doc") or natural AI commands (`/remove doc`, `detach file`) without losing your ongoing chat history.
 
 ### 2. ⚡ Real-Time Search Bar AI Synthesis
 - As you type in the global search bar on the Dashboard, SmartSphere filters your documents and generates a live **AI Workspace Synthesis** banner right inside the dropdown.
@@ -36,7 +37,8 @@
 - **100 MB Local Storage Quota:** Built-in personal workspace storage with live quota tracking and upload guards.
 - **Google Drive Integration (Up to 15 GB):** Authenticate with Google Drive to browse remote directories, import files with instant AI summarization, or sync local documents back to Google Drive.
 
-### 5. 🔐 Authentication & Security
+### 5. ⚙️ Complete Workspace Settings & Security
+- **Profile & Credential Management:** Update user profile details, manage connected Google Drive accounts, and update passwords directly from the Settings panel.
 - **Dual Authentication Modes:** Native Email/Password with JWT and Google One-Click Sign-In.
 - **Secure Password Reset:** Branded HTML reset emails sent via Gmail SMTP with SHA-256 expiring tokens.
 

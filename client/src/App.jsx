@@ -9,6 +9,7 @@ import DocEditor from './pages/DocEditor';
 import CloudHub from './pages/CloudHub';
 import BuddyBot from './pages/BuddyBot';
 import MyStorage from './pages/MyStorage';
+import Settings from './pages/Settings';
 
 import MainLayout from './layouts/MainLayout';
 
@@ -111,6 +112,15 @@ function App() {
           element={
             <ProtectedLayout>
               <BuddyBot />
+            </ProtectedLayout>
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            <ProtectedLayout>
+              <Settings />
             </ProtectedLayout>
           }
         />

@@ -96,6 +96,20 @@ router.get('/google/storage', async (req, res) => {
   }
 });
 
+// @desc    Disconnect Google Drive
+// @route   POST /api/cloud/google/disconnect
+router.post('/google/disconnect', async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.user._id, {
+      $unset: { googleDriveTokens: 1 },
+    });
+    return res.json({ message: 'Google Drive disconnected successfully' });
+  } catch (error) {
+    console.error('Disconnect Drive error:', error);
+    return res.status(500).json({ message: error.message || 'Error disconnecting Google Drive' });
+  }
+});
+
 // @desc    List Google Drive files
 // @route   GET /api/cloud/google/files
 router.get('/google/files', async (req, res) => {

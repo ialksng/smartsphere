@@ -120,6 +120,32 @@ export default function ChatInterface({ onInsightAdded, initialFile, prefillQuer
   const handleSend = async () => {
     if (!input.trim()) return;
 
+    const trimmedInput = input.trim();
+    // Natural AI command to remove/detach document without clearing chat history
+    const isRemoveDocCmd = /^\/?(remove|detach|clear|delete|forget)\s*(doc|document|file)?$/i.test(trimmedInput);
+
+    if (isRemoveDocCmd) {
+      const prevDoc = activeFileName || 'Document';
+      setActiveFileName('');
+      setActiveContext('');
+
+      const userMsg = { role: 'user', text: input };
+      const aiReply = activeFileName
+        ? `📄 **Document Detached:** "${prevDoc}" has been removed from active context.\n\nYour chat history is preserved. I have returned to **Global Workspace Scanning** mode across all your documents.`
+        : `ℹ️ **Context Status:** No active document was attached. Currently in **Global Workspace Scanning** mode across all your documents.`;
+
+      setMessages((prev) => [...prev, userMsg, { role: 'ai', text: aiReply }]);
+      setInput('');
+
+      try {
+        await apiClient.post('/ai/chat', {
+          message: input,
+          history: messages.filter((m) => !m.isSystem).slice(-10),
+        });
+      } catch (e) {}
+      return;
+    }
+
     const userMsg = { role: 'user', text: input };
     const newHistory = [...messages, userMsg];
     setMessages(newHistory);
@@ -751,6 +777,33 @@ export default function ChatInterface({ onInsightAdded, initialFile, prefillQuer
         )}
         <div ref={messagesEndRef} />
       </div>
+
+      {/* ATTACHED FILE STAGING BAR (Allows removing doc when uploading or before sending) */}
+      {activeFileName && (
+        <div className="px-4 py-2 bg-gradient-to-r from-blue-950/80 via-indigo-950/70 to-slate-900 border-t border-blue-500/30 flex items-center justify-between text-xs z-10">
+          <div className="flex items-center gap-2 text-blue-200 truncate">
+            <span className="p-1 rounded bg-blue-500/20 text-blue-300 flex-shrink-0">
+              <FileText size={14} />
+            </span>
+            <span className="font-medium text-white truncate max-w-xs">{activeFileName}</span>
+            <span className="text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+              Active Context
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              setActiveFileName('');
+              setActiveContext('');
+            }}
+            className="flex items-center gap-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2 py-1 rounded transition font-medium"
+            title="Detach document from context (preserves chat history)"
+          >
+            <X size={13} />
+            <span>Remove Doc</span>
+          </button>
+        </div>
+      )}
 
       {/* Input Area */}
       <div className="p-4 border-t border-white/10 bg-white/5 flex items-center gap-3 relative z-10">
