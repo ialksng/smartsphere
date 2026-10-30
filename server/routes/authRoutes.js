@@ -110,32 +110,76 @@ router.post('/forgot-password', async (req, res) => {
     const frontendUrl = getFrontendUrl();
     const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
-    // Try sending email if SMTP is configured
+    // Try sending email if SMTP / Gmail is configured
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-      const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-        port: process.env.EMAIL_PORT || 587,
-        secure: false,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
+      try {
+        const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+          port: process.env.EMAIL_PORT ? parseInt(process.env.EMAIL_PORT) : 465,
+          secure: true,
+          auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS.replace(/\s+/g, ''), // Strip spaces in 16-char Gmail app password
+          },
+        });
 
-      await transporter.sendMail({
-        from: `"SmartSphere" <${process.env.EMAIL_USER}>`,
-        to: user.email,
-        subject: 'SmartSphere Password Reset Request',
-        html: `
-          <div style="font-family: sans-serif; padding: 20px;">
-            <h2>Password Reset Request</h2>
-            <p>You requested to reset your password on SmartSphere.</p>
-            <p>Click the link below to set a new password (valid for 15 minutes):</p>
-            <p><a href="${resetUrl}" style="background-color: #2563eb; color: #fff; padding: 10px 18px; border-radius: 6px; text-decoration: none;">Reset Password</a></p>
-            <p>If you did not request this, please ignore this email.</p>
-          </div>
-        `,
-      });
+        const senderFrom = process.env.EMAIL_FROM || `SmartSphere <${process.env.EMAIL_USER}>`;
+        const replyTo = process.env.EMAIL_REPLY_TO || process.env.EMAIL_USER;
+
+        await transporter.sendMail({
+          from: senderFrom,
+          replyTo: replyTo,
+          to: user.email,
+          subject: 'SmartSphere - Reset Your Password',
+          html: `
+            <div style="background-color: #0b0f1a; padding: 40px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #ffffff;">
+              <div style="max-width: 520px; margin: 0 auto; background: #131b2e; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+                <div style="text-align: center; margin-bottom: 24px;">
+                  <h1 style="margin: 0; font-size: 24px; font-weight: 700; background: linear-gradient(to right, #60a5fa, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: #60a5fa;">
+                    SmartSphere
+                  </h1>
+                  <p style="margin: 4px 0 0 0; font-size: 13px; color: #94a3b8;">AI Workspace Password Reset</p>
+                </div>
+                
+                <p style="font-size: 15px; line-height: 1.6; color: #e2e8f0; margin-bottom: 20px;">
+                  Hello ${user.name || 'there'},
+                </p>
+                <p style="font-size: 14px; line-height: 1.6; color: #94a3b8; margin-bottom: 28px;">
+                  We received a request to reset the password for your SmartSphere account associated with <strong>${user.email}</strong>. Click the button below to set a new password:
+                </p>
+                
+                <div style="text-align: center; margin-bottom: 28px;">
+                  <a href="${resetUrl}" style="display: inline-block; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; padding: 14px 28px; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 10px; box-shadow: 0 4px 14px rgba(37,99,235,0.4);">
+                    Reset Password
+                  </a>
+                </div>
+                
+                <p style="font-size: 12px; color: #64748b; line-height: 1.5; margin-bottom: 16px;">
+                  ⏰ This link is valid for <strong>15 minutes</strong>. If you did not request a password reset, you can safely ignore this email — your account remains secure.
+                </p>
+                
+                <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px; margin-top: 24px;">
+                  <p style="font-size: 11px; color: #64748b; word-break: break-all;">
+                    Button not working? Copy and paste this URL into your browser:<br/>
+                    <a href="${resetUrl}" style="color: #60a5fa; text-decoration: underline;">${resetUrl}</a>
+                  </p>
+                </div>
+              </div>
+              <div style="text-align: center; margin-top: 24px; font-size: 12px; color: #64748b;">
+                © SmartSphere AI Workspace • <a href="https://ialksng.me" style="color: #64748b; text-decoration: none;">ialksng.me</a>
+              </div>
+            </div>
+          `,
+        });
+        console.log(`✅ Password reset email sent to ${user.email} via ${process.env.EMAIL_USER}`);
+      } catch (mailErr) {
+        console.error('❌ Nodemailer Error sending password reset email:', mailErr);
+        console.log(`\n========================================`);
+        console.log(`[FALLBACK RESET LINK for ${user.email}]:`);
+        console.log(resetUrl);
+        console.log(`========================================\n`);
+      }
     } else {
       console.log(`\n========================================`);
       console.log(`[PASSWORD RESET LINK for ${user.email}]:`);

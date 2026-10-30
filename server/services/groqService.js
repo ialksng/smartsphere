@@ -100,3 +100,4 @@ export const summarizeDocument = async (filename, content) => {
     'You are an expert document summarizer. Highlight key points cleanly in Markdown.'
   );
 };
+
