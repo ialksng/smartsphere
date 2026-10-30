@@ -4,7 +4,7 @@ import Document from '../models/Document.js';
 import Folder from '../models/Folder.js';
 import { protect } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
-import { summarizeDocument } from '../services/grokService.js';
+import { summarizeDocument } from '../services/groqService.js';
 
 const router = express.Router();
 

@@ -25,6 +25,8 @@ services:
         sync: false
       - key: GOOGLE_AUTH_REDIRECT_URI
         sync: false
-      - key: GROK_API_KEY
+      - key: GROQ_API_KEY
         sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
 

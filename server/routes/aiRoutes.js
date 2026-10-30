@@ -4,7 +4,7 @@ import Document from '../models/Document.js';
 import ChatMessage from '../models/ChatMessage.js';
 import { protect } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
-import { askGrok, summarizeDocument } from '../services/grokService.js';
+import { askGroq, summarizeDocument } from '../services/groqService.js';
 
 const router = express.Router();
 router.use(protect);
@@ -31,7 +31,7 @@ router.post('/chat', async (req, res) => {
       text: message || 'Document query',
     });
 
-    const reply = await askGrok(contextualPrompt, history);
+    const reply = await askGroq(contextualPrompt, history);
 
     // Save AI response to history
     await ChatMessage.create({

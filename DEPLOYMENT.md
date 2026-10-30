@@ -58,8 +58,8 @@ smartsphere/
    | `GOOGLE_CLIENT_SECRET`| Your Google OAuth Client Secret *(add when ready)* |
    | `GOOGLE_REDIRECT_URI` | `https://<your-render-url>/api/cloud/google/callback` |
    | `GOOGLE_AUTH_REDIRECT_URI` | `https://<your-render-url>/api/auth/google/callback` |
-   | `GROK_API_KEY` | Your xAI Grok API Key *(add when ready)* |
-   | `GROK_MODEL` | `grok-beta` |
+   | `GROQ_API_KEY` | Your Groq Cloud API Key (from https://console.groq.com/keys) |
+   | `GROQ_MODEL` | `llama-3.3-70b-versatile` |
    | `EMAIL_USER` | *(Optional)* SMTP / Gmail address for forgot-password emails |
    | `EMAIL_PASS` | *(Optional)* SMTP / Gmail App Password |
 

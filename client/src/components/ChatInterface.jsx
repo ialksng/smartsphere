@@ -580,7 +580,7 @@ export default function ChatInterface({ onInsightAdded, initialFile }) {
       {/* Main Chat Header */}
       <div className="p-4 border-b border-white/10 bg-white/5 flex justify-between items-center">
         <div>
-          <h2 className="text-xl font-semibold">BuddyBot AI (Grok)</h2>
+          <h2 className="text-xl font-semibold">BuddyBot AI (Groq)</h2>
           <p className="text-xs text-gray-400">Context-Aware Document Analysis</p>
         </div>
         <div className="flex items-center gap-2">
@@ -620,7 +620,7 @@ export default function ChatInterface({ onInsightAdded, initialFile }) {
         {isLoading && (
           <div className="flex justify-start">
             <div className="p-3 bg-white/10 border border-white/10 rounded-2xl text-sm flex items-center gap-2 text-gray-400">
-              <Loader2 className="animate-spin text-blue-400" size={16} /> Thinking with Grok...
+              <Loader2 className="animate-spin text-blue-400" size={16} /> Thinking with Groq...
             </div>
           </div>
         )}

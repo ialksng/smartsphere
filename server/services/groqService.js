@@ -1,22 +1,22 @@
 import axios from 'axios';
 
-const GROK_API_URL = 'https://api.x.ai/v1/chat/completions';
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 /**
- * Send a chat completion request to xAI Grok
+ * Send a chat completion request to Groq (ultra-fast LPU inference)
  * @param {string} prompt - The user prompt or contextual question
  * @param {Array} history - Previous messages array [{ role: 'user'|'assistant', text: string }]
  * @param {string} systemInstruction - Optional system message
  */
-export const askGrok = async (prompt, history = [], systemInstruction = '') => {
-  const apiKey = process.env.GROK_API_KEY || process.env.XAI_API_KEY;
+export const askGroq = async (prompt, history = [], systemInstruction = '') => {
+  const apiKey = process.env.GROQ_API_KEY;
 
-  if (!apiKey || apiKey.includes('your-grok-api-key')) {
+  if (!apiKey || apiKey.includes('your-groq-api-key')) {
     return (
-      `[AI Workspace Notice: Grok API Key is not set yet]\n\n` +
+      `[AI Workspace Notice: Groq API Key is not configured yet]\n\n` +
       `Here is a simulated response for: "${prompt.slice(0, 100)}..."\n\n` +
-      `To connect live Grok AI, add your GROK_API_KEY to your server .env or Render dashboard. ` +
-      `Once configured, Grok will answer questions about your documents and files with real-time reasoning.`
+      `To connect live ultra-fast Groq AI, add your GROQ_API_KEY (from https://console.groq.com/keys) to your Render environment variables or server/.env. ` +
+      `Once added, Groq will instantly power BuddyBot with Llama-3.3-70B!`
     );
   }
 
@@ -32,7 +32,7 @@ export const askGrok = async (prompt, history = [], systemInstruction = '') => {
       formattedMessages.push({
         role: 'system',
         content:
-          'You are BuddyBot, an intelligent and helpful AI assistant for SmartSphere workspace. You analyze documents, assist with writing, and answer questions clearly.',
+          'You are BuddyBot, an intelligent and helpful AI assistant for SmartSphere workspace powered by Groq. You analyze documents, assist with writing, and answer questions clearly with high speed and precision.',
       });
     }
 
@@ -40,7 +40,7 @@ export const askGrok = async (prompt, history = [], systemInstruction = '') => {
     if (Array.isArray(history)) {
       for (const msg of history.slice(-10)) {
         formattedMessages.push({
-          role: msg.role === 'ai' ? 'assistant' : 'user',
+          role: msg.role === 'ai' || msg.role === 'assistant' ? 'assistant' : 'user',
           content: msg.text || msg.content || '',
         });
       }
@@ -53,33 +53,36 @@ export const askGrok = async (prompt, history = [], systemInstruction = '') => {
     });
 
     const response = await axios.post(
-      GROK_API_URL,
+      GROQ_API_URL,
       {
-        model: process.env.GROK_MODEL || 'grok-beta',
+        model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
         messages: formattedMessages,
         temperature: 0.7,
-        max_tokens: 1500,
+        max_tokens: 2048,
       },
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
+          Authorization: `Bearer ${apiKey.trim()}`,
         },
-        timeout: 45000,
+        timeout: 30000,
       }
     );
 
     const reply = response.data?.choices?.[0]?.message?.content;
-    return reply || 'No response returned from Grok AI.';
+    return reply || 'No response returned from Groq AI.';
   } catch (error) {
-    console.error('Error calling Grok API:', error.response?.data || error.message);
-    const detail = error.response?.data?.error || error.message;
-    return `Grok AI Error: ${detail}. Please check your GROK_API_KEY and network connection.`;
+    console.error('Error calling Groq API:', error.response?.data || error.message);
+    const detail = error.response?.data?.error?.message || error.message;
+    return `Groq AI Error: ${detail}. Please check your GROQ_API_KEY and network connection.`;
   }
 };
 
+// Alias for backward compatibility
+export const askGrok = askGroq;
+
 /**
- * Summarize document content using Grok
+ * Summarize document content using Groq
  */
 export const summarizeDocument = async (filename, content) => {
   if (!content || content.trim().length === 0) {
@@ -91,10 +94,9 @@ export const summarizeDocument = async (filename, content) => {
     6000
   )}`;
 
-  return await askGrok(
+  return await askGroq(
     prompt,
     [],
     'You are an expert document summarizer. Highlight key points cleanly in Markdown.'
   );
 };
-

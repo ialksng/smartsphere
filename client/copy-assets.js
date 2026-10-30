@@ -31,3 +31,4 @@ try {
 } catch (err) {
   console.error('Error copying assets:', err);
 }
+
