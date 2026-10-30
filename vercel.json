@@ -3,27 +3,27 @@
   "outputDirectory": "client/dist",
   "rewrites": [
     {
-      "source": "/work/projects/smartsphere/app/api/(.*)",
-      "destination": "https://smartsphere-drat.onrender.com/api/$1"
+      "source": "/work/projects/smartsphere/app/api/:match*",
+      "destination": "https://smartsphere-drat.onrender.com/api/:match*"
     },
     {
-      "source": "/api/(.*)",
-      "destination": "https://smartsphere-drat.onrender.com/api/$1"
+      "source": "/api/:match*",
+      "destination": "https://smartsphere-drat.onrender.com/api/:match*"
     },
     {
-      "source": "/work/projects/smartsphere/app/assets/(.*)",
-      "destination": "/assets/$1"
+      "source": "/work/projects/smartsphere/app/assets/:match*",
+      "destination": "/assets/:match*"
     },
     {
-      "source": "/assets/(.*)",
-      "destination": "/assets/$1"
+      "source": "/assets/:match*",
+      "destination": "/assets/:match*"
     },
     {
-      "source": "/work/projects/smartsphere/app/(.*)",
+      "source": "/work/projects/smartsphere/app/:match*",
       "destination": "/index.html"
     },
     {
-      "source": "/(.*)",
+      "source": "/:match*",
       "destination": "/index.html"
     }
   ]
