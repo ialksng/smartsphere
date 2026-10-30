@@ -1,8 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Save, ArrowLeft, Loader2, CloudUpload, Bot, X, Send } from "lucide-react";
+import { Save, ArrowLeft, CloudUpload, Bot, X, Send } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import Loader from "../components/Loader";
 import apiClient from "../services/apiClient";
 
 const DocEditor = () => {
@@ -150,7 +152,7 @@ const DocEditor = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0b0f19] text-white flex items-center justify-center">
-        <Loader2 className="animate-spin text-blue-500" size={32} />
+        <Loader variant="full" size="lg" text="Loading Document..." subtext="Syncing content with workspace" />
       </div>
     );
   }
@@ -201,8 +203,7 @@ const DocEditor = () => {
               disabled={saving}
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 px-4 py-2 rounded-lg transition-colors text-sm"
             >
-              {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-              {saving ? "Saving..." : "Save"}
+              {saving ? <Loader variant="button" size="sm" text="Saving..." /> : <><Save size={16} /> Save</>}
             </button>
           )}
         </div>
@@ -260,17 +261,37 @@ const DocEditor = () => {
                     className={`p-3 rounded-xl max-w-[85%] text-sm ${
                       msg.role === "user"
                         ? "bg-blue-600 text-white rounded-br-none shadow-md"
-                        : "bg-white/10 text-gray-200 rounded-bl-none shadow-md whitespace-pre-wrap"
+                        : "bg-white/10 text-gray-200 rounded-bl-none shadow-md"
                     }`}
                   >
-                    {msg.text}
+                    {msg.role === "ai" ? (
+                      <ReactMarkdown
+                        components={{
+                          p: ({ node, ...props }) => <p className="mb-1.5 last:mb-0 leading-relaxed" {...props} />,
+                          strong: ({ node, ...props }) => <strong className="font-semibold text-blue-300" {...props} />,
+                          ul: ({ node, ...props }) => <ul className="list-disc pl-4 mb-2 space-y-1" {...props} />,
+                          ol: ({ node, ...props }) => <ol className="list-decimal pl-4 mb-2 space-y-1" {...props} />,
+                          li: ({ node, ...props }) => <li className="text-gray-200" {...props} />,
+                          code: ({ node, inline, ...props }) =>
+                            inline ? (
+                              <code className="bg-black/40 text-blue-300 px-1 py-0.5 rounded text-xs" {...props} />
+                            ) : (
+                              <code className="block bg-black/40 p-2 rounded text-xs overflow-x-auto text-blue-200 font-mono" {...props} />
+                            ),
+                        }}
+                      >
+                        {msg.text}
+                      </ReactMarkdown>
+                    ) : (
+                      msg.text
+                    )}
                   </div>
                 </div>
               ))}
               {chatLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-white/10 p-3 rounded-xl rounded-bl-none text-gray-400 flex items-center gap-2 text-sm">
-                    <Loader2 size={14} className="animate-spin" /> Analyzing Document...
+                  <div className="bg-white/10 p-3 rounded-xl rounded-bl-none text-gray-400 text-sm">
+                    <Loader variant="inline" size="xs" text="Analyzing Document..." />
                   </div>
                 </div>
               )}

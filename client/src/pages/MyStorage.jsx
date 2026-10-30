@@ -13,6 +13,7 @@ import {
   CloudUpload,
   Bot,
 } from "lucide-react";
+import Loader from "../components/Loader";
 import apiClient from "../services/apiClient";
 
 export default function MyStorage() {
@@ -21,6 +22,7 @@ export default function MyStorage() {
   // Unified Storage State
   const [items, setItems] = useState([]);
   const [used, setUsed] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   // Folder Navigation State
   const [currentFolder, setCurrentFolder] = useState({ id: null, name: "My Storage" });
@@ -49,6 +51,7 @@ export default function MyStorage() {
 
   const fetchData = async (parentId = null) => {
     const endpoint = parentId ? `/dochub?parentId=${parentId}` : `/dochub?parentId=null`;
+    setLoading(true);
 
     try {
       const res = await apiClient.get(endpoint);
@@ -61,6 +64,8 @@ export default function MyStorage() {
       }
     } catch (error) {
       console.error("Error fetching storage data:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -335,99 +340,107 @@ export default function MyStorage() {
       </h2>
 
       {/* GRID */}
-      <div className="grid md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {/* Folders */}
-        {items
-          .filter((f) => f.type === "folder")
-          .map((folder) => (
-            <div
-              key={folder._id}
-              onContextMenu={(e) => handleContextMenu(e, folder)}
-              className="p-4 rounded-xl bg-white/5 border border-transparent hover:border-emerald-500/50 hover:bg-white/10 transition flex flex-col justify-between relative group"
-            >
-              <div onClick={() => openFolder(folder)} className="cursor-pointer">
-                <FolderIcon
-                  className="text-emerald-400 mb-2 group-hover:scale-110 transition-transform"
-                  size={24}
-                  fill="currentColor"
-                />
-                <p className="text-sm font-medium truncate">{folder.filename}</p>
-              </div>
-
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setExportMenuId(exportMenuId === folder._id ? null : folder._id);
-                }}
-                className="mt-3 text-xs text-emerald-400 text-left hover:text-emerald-300 transition flex items-center gap-1 opacity-0 group-hover:opacity-100"
+      {loading ? (
+        <Loader variant="section" size="lg" text="Loading files and folders..." />
+      ) : items.length === 0 ? (
+        <div className="text-center text-gray-500 py-16 bg-white/5 rounded-2xl border border-white/10">
+          Folder is empty. Create a folder or upload a file above.
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {/* Folders */}
+          {items
+            .filter((f) => f.type === "folder")
+            .map((folder) => (
+              <div
+                key={folder._id}
+                onContextMenu={(e) => handleContextMenu(e, folder)}
+                className="p-4 rounded-xl bg-white/5 border border-transparent hover:border-emerald-500/50 hover:bg-white/10 transition flex flex-col justify-between relative group"
               >
-                <CloudUpload size={14} /> Sync to Cloud
-              </button>
-
-              {exportMenuId === folder._id && (
-                <div className="absolute bottom-10 left-4 bg-[#1a2235] border border-white/10 rounded shadow-lg z-10 w-40 overflow-hidden">
-                  <button
-                    onClick={() => pushToCloud(folder._id, "folder", "google")}
-                    className="w-full text-left px-3 py-2 text-xs hover:bg-white/5"
-                  >
-                    Google Drive
-                  </button>
+                <div onClick={() => openFolder(folder)} className="cursor-pointer">
+                  <FolderIcon
+                    className="text-emerald-400 mb-2 group-hover:scale-110 transition-transform"
+                    size={24}
+                    fill="currentColor"
+                  />
+                  <p className="text-sm font-medium truncate">{folder.filename}</p>
                 </div>
-              )}
-            </div>
-          ))}
 
-        {/* Files */}
-        {items
-          .filter((f) => f.type !== "folder")
-          .map((file) => (
-            <div
-              key={file._id}
-              onContextMenu={(e) => handleContextMenu(e, file)}
-              className="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-blue-500/50 hover:bg-white/10 transition flex flex-col justify-between relative group"
-            >
-              <div onClick={() => openFile(file)} className="cursor-pointer">
-                <FileText className="text-blue-400 mb-2" size={24} />
-                <p className="text-sm font-medium truncate">{file.filename}</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {((file.size || 0) / 1024).toFixed(1)} KB
-                </p>
-              </div>
-
-              <div className="mt-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setExportMenuId(exportMenuId === file._id ? null : file._id);
+                    setExportMenuId(exportMenuId === folder._id ? null : folder._id);
                   }}
-                  className="text-xs text-blue-400 text-left hover:text-blue-300 transition flex items-center gap-1"
+                  className="mt-3 text-xs text-emerald-400 text-left hover:text-emerald-300 transition flex items-center gap-1 opacity-0 group-hover:opacity-100"
                 >
                   <CloudUpload size={14} /> Sync to Cloud
                 </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    sendToBuddyBot(file);
-                  }}
-                  className="text-xs text-purple-400 text-left hover:text-purple-300 transition flex items-center gap-1"
-                >
-                  <Bot size={14} /> Send to AI Assistant
-                </button>
-              </div>
 
-              {exportMenuId === file._id && (
-                <div className="absolute bottom-10 left-4 bg-[#1a2235] border border-white/10 rounded shadow-lg z-10 w-40 overflow-hidden">
+                {exportMenuId === folder._id && (
+                  <div className="absolute bottom-10 left-4 bg-[#1a2235] border border-white/10 rounded shadow-lg z-10 w-40 overflow-hidden">
+                    <button
+                      onClick={() => pushToCloud(folder._id, "folder", "google")}
+                      className="w-full text-left px-3 py-2 text-xs hover:bg-white/5"
+                    >
+                      Google Drive
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+
+          {/* Files */}
+          {items
+            .filter((f) => f.type !== "folder")
+            .map((file) => (
+              <div
+                key={file._id}
+                onContextMenu={(e) => handleContextMenu(e, file)}
+                className="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-blue-500/50 hover:bg-white/10 transition flex flex-col justify-between relative group"
+              >
+                <div onClick={() => openFile(file)} className="cursor-pointer">
+                  <FileText className="text-blue-400 mb-2" size={24} />
+                  <p className="text-sm font-medium truncate">{file.filename}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {((file.size || 0) / 1024).toFixed(1)} KB
+                  </p>
+                </div>
+
+                <div className="mt-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
-                    onClick={() => pushToCloud(file._id, "file", "google")}
-                    className="w-full text-left px-3 py-2 text-xs hover:bg-white/5"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExportMenuId(exportMenuId === file._id ? null : file._id);
+                    }}
+                    className="text-xs text-blue-400 text-left hover:text-blue-300 transition flex items-center gap-1"
                   >
-                    Google Drive
+                    <CloudUpload size={14} /> Sync to Cloud
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      sendToBuddyBot(file);
+                    }}
+                    className="text-xs text-purple-400 text-left hover:text-purple-300 transition flex items-center gap-1"
+                  >
+                    <Bot size={14} /> Send to AI Assistant
                   </button>
                 </div>
-              )}
-            </div>
-          ))}
-      </div>
+
+                {exportMenuId === file._id && (
+                  <div className="absolute bottom-10 left-4 bg-[#1a2235] border border-white/10 rounded shadow-lg z-10 w-40 overflow-hidden">
+                    <button
+                      onClick={() => pushToCloud(file._id, "file", "google")}
+                      className="w-full text-left px-3 py-2 text-xs hover:bg-white/5"
+                    >
+                      Google Drive
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+        </div>
+      )}
 
       {/* CONTEXT MENU */}
       {contextMenu.visible && (

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Loader2, Lock, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Lock, CheckCircle2, ArrowLeft } from 'lucide-react';
+import Loader from '../components/Loader';
 import apiClient from '../services/apiClient';
 
 export default function ResetPassword() {
@@ -118,7 +119,7 @@ export default function ResetPassword() {
               className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white rounded-xl py-3 text-sm font-medium transition shadow-lg shadow-blue-500/20 flex justify-center items-center gap-2"
             >
               {isLoading ? (
-                <Loader2 size={18} className="animate-spin" />
+                <Loader variant="button" size="sm" text="Saving..." />
               ) : (
                 'Save New Password'
               )}

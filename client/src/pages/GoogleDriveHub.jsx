@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   Cloud,
   FileText,
-  Loader2,
   Search,
   Folder,
   ChevronRight,
@@ -11,6 +10,7 @@ import {
   Bot,
   AlertCircle,
 } from 'lucide-react';
+import Loader from '../components/Loader';
 import apiClient from '../services/apiClient';
 
 export default function GoogleDriveHub() {
@@ -207,9 +207,7 @@ export default function GoogleDriveHub() {
 
       <div className="bg-white/5 border border-white/10 rounded-2xl p-6 min-h-[300px]">
         {isLoading ? (
-          <div className="flex justify-center py-16">
-            <Loader2 className="animate-spin text-blue-400" size={32} />
-          </div>
+          <Loader variant="section" size="lg" text="Loading Google Drive files..." />
         ) : errorMessage ? (
           <div className="flex flex-col items-center justify-center text-red-400 py-10">
             <AlertCircle size={40} className="mb-4 opacity-80" />
@@ -265,7 +263,7 @@ export default function GoogleDriveHub() {
                       title="Import to DocHub"
                     >
                       {importingFileId === file.id ? (
-                        <Loader2 className="animate-spin" size={16} />
+                        <Loader variant="button" size="sm" />
                       ) : (
                         <DownloadCloud size={16} />
                       )}

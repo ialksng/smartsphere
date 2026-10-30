@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Cloud, Bot, Loader2, Plus, Search, Star, DownloadCloud, Sparkles, ArrowRight } from 'lucide-react';
+import { FileText, Cloud, Bot, Plus, Search, Star, DownloadCloud, Sparkles, ArrowRight } from 'lucide-react';
+import Loader from '../components/Loader';
 import apiClient from '../services/apiClient';
 
 export default function Dashboard() {
@@ -116,7 +117,7 @@ export default function Dashboard() {
     if (!doc.isExternal) {
       setShowDropdown(false);
       setSearch("");
-      navigate('/editor', { state: { docId: doc._id } });
+      navigate('/doceditor', { state: { docId: doc._id } });
       return;
     }
 
@@ -136,7 +137,7 @@ export default function Dashboard() {
       if (res.data.insight) {
         setShowDropdown(false);
         setSearch("");
-        navigate('/editor', { state: { docId: res.data.insight._id } });
+        navigate('/doceditor', { state: { docId: res.data.insight._id } });
       } else {
         alert(res.data.message || "Failed to import file");
       }
@@ -205,9 +206,8 @@ export default function Dashboard() {
                   </button>
                 </div>
                 {isAiSynthesizing && !aiInsight ? (
-                  <div className="text-xs text-gray-400 italic flex items-center gap-2">
-                    <Loader2 size={12} className="animate-spin" />
-                    AI scanning and analyzing documents for "{search}"...
+                  <div className="text-xs text-gray-400 italic">
+                    <Loader variant="inline" size="xs" text={`AI scanning and analyzing documents for "${search}"...`} />
                   </div>
                 ) : (
                   <p className="text-xs text-gray-200 leading-relaxed font-normal whitespace-pre-line">
@@ -218,9 +218,8 @@ export default function Dashboard() {
             )}
 
             {isSearching && searchResults.length === 0 ? (
-              <div className="p-4 text-center text-gray-400 text-sm flex items-center justify-center gap-2">
-                <Loader2 className="animate-spin" size={16} />
-                Scanning Local & Cloud Drives...
+              <div className="p-6 text-center">
+                <Loader variant="inline" size="sm" text="Scanning Local & Cloud Drives..." />
               </div>
             ) : searchResults.length > 0 ? (
               <ul className="overflow-y-auto">
@@ -241,7 +240,7 @@ export default function Dashboard() {
                       </div>
                       
                       {importingFileId === doc._id && (
-                        <Loader2 size={14} className="animate-spin text-gray-400 ml-2" />
+                        <Loader variant="button" size="xs" color="text-gray-400" />
                       )}
                     </div>
                     
@@ -310,7 +309,7 @@ export default function Dashboard() {
         </div>
 
         {loading ? (
-          <Loader2 className="animate-spin mx-auto mt-4" />
+          <Loader variant="section" size="md" text="Loading recent documents..." />
         ) : docs.length === 0 ? (
           <p className="text-gray-400 text-center mt-4">No documents yet</p>
         ) : (
@@ -319,7 +318,7 @@ export default function Dashboard() {
               <div
                 key={doc._id}
                 onClick={() =>
-                  navigate('/editor', { state: { docId: doc._id } })
+                  navigate('/doceditor', { state: { docId: doc._id } })
                 }
                 className="p-4 rounded-xl bg-white/5 hover:bg-white/10 cursor-pointer border border-white/10 transition-colors"
               >

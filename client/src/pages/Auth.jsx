@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Loader2, Lock, Mail, User, ArrowLeft, CheckCircle2, ExternalLink, Globe } from 'lucide-react';
+import { Lock, Mail, User, ArrowLeft, CheckCircle2, ExternalLink, Globe } from 'lucide-react';
+import Loader from '../components/Loader';
 import apiClient, { getApiUrl } from '../services/apiClient';
 
 export default function Auth() {
@@ -242,7 +243,7 @@ export default function Auth() {
             className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white rounded-xl py-3 text-sm font-medium transition shadow-lg shadow-blue-500/20 flex justify-center items-center gap-2"
           >
             {isLoading ? (
-              <Loader2 size={18} className="animate-spin" />
+              <Loader variant="button" size="sm" text="Please wait..." />
             ) : isForgotPass ? (
               'Send Reset Link'
             ) : isLogin ? (

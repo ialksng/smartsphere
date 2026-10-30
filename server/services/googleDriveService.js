@@ -23,21 +23,35 @@ const DRIVE_SCOPES = [
 /**
  * Generate Google OAuth Consent Screen URL
  */
-export const getDriveAuthUrl = (userId) => {
-  const oauth2Client = createOAuth2Client();
+export const getDriveAuthUrl = (userId, customRedirectUri = null) => {
+  const redirectUri =
+    customRedirectUri ||
+    process.env.GOOGLE_REDIRECT_URI ||
+    'https://ialksng.me/work/projects/smartsphere/app/api/cloud/google/callback';
+
+  const oauth2Client = createOAuth2Client(redirectUri);
+
+  // Encode state as JSON so callback can preserve userId and redirectUri
+  const state = JSON.stringify({ userId, redirectUri });
+
   return oauth2Client.generateAuthUrl({
     access_type: 'offline',
     prompt: 'consent',
     scope: DRIVE_SCOPES,
-    state: userId, // Pass userId in state so callback knows who to link
+    state,
   });
 };
 
 /**
  * Exchange callback code for tokens
  */
-export const exchangeCodeForTokens = async (code) => {
-  const oauth2Client = createOAuth2Client();
+export const exchangeCodeForTokens = async (code, customRedirectUri = null) => {
+  const redirectUri =
+    customRedirectUri ||
+    process.env.GOOGLE_REDIRECT_URI ||
+    'https://ialksng.me/work/projects/smartsphere/app/api/cloud/google/callback';
+
+  const oauth2Client = createOAuth2Client(redirectUri);
   const { tokens } = await oauth2Client.getToken(code);
   return tokens;
 };

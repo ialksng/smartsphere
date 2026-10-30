@@ -35,7 +35,8 @@ router.get('/google/auth', (req, res) => {
       });
     }
 
-    const url = getDriveAuthUrl(userId);
+    const redirectUri = req.query.redirectUri || process.env.GOOGLE_REDIRECT_URI;
+    const url = getDriveAuthUrl(userId, redirectUri);
     return res.json({ url });
   } catch (error) {
     console.error('Google Drive Auth initiation error:', error);
@@ -46,15 +47,28 @@ router.get('/google/auth', (req, res) => {
 // @desc    Google Drive OAuth Callback
 // @route   GET /api/cloud/google/callback
 router.get('/google/callback', async (req, res) => {
-  const { code, state: userId } = req.query;
+  const { code, state } = req.query;
   const frontendUrl = getFrontendUrl();
+
+  let userId = state;
+  let customRedirectUri = null;
+
+  if (state) {
+    try {
+      const parsed = JSON.parse(state);
+      userId = parsed.userId || state;
+      customRedirectUri = parsed.redirectUri || null;
+    } catch {
+      userId = state;
+    }
+  }
 
   if (!code || !userId) {
     return res.redirect(`${frontendUrl}/cloudhub/google?error=auth_failed`);
   }
 
   try {
-    const tokens = await exchangeCodeForTokens(code);
+    const tokens = await exchangeCodeForTokens(code, customRedirectUri);
 
     await User.findByIdAndUpdate(userId, {
       $set: { googleDriveTokens: tokens },

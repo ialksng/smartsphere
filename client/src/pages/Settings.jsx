@@ -13,10 +13,10 @@ import {
   AlertCircle,
   ExternalLink,
   Globe,
-  Loader2,
   Save,
   Lock,
 } from 'lucide-react';
+import Loader from '../components/Loader';
 import apiClient from '../services/apiClient';
 
 export default function Settings() {
@@ -240,8 +240,7 @@ export default function Settings() {
               disabled={isUpdatingName}
               className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-medium transition flex items-center gap-2 disabled:opacity-50 shadow-lg"
             >
-              {isUpdatingName ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-              Save Profile
+              {isUpdatingName ? <Loader variant="button" size="sm" text="Saving..." /> : <><Save size={16} /> Save Profile</>}
             </button>
           </form>
         </div>
@@ -335,7 +334,11 @@ export default function Settings() {
                     disabled={isDisconnectingDrive}
                     className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 text-xs font-medium rounded-xl border border-red-500/30 transition disabled:opacity-50"
                   >
-                    {isDisconnectingDrive ? 'Disconnecting...' : 'Disconnect'}
+                    {isDisconnectingDrive ? (
+                      <Loader variant="button" size="xs" color="text-red-300" text="Disconnecting..." />
+                    ) : (
+                      'Disconnect'
+                    )}
                   </button>
                 </>
               ) : (
@@ -477,11 +480,13 @@ export default function Settings() {
                 className="px-5 py-2.5 bg-white text-black hover:bg-gray-200 rounded-xl text-sm font-semibold transition flex items-center gap-2 disabled:opacity-50 shadow-lg"
               >
                 {isChangingPass ? (
-                  <Loader2 size={16} className="animate-spin" />
+                  <Loader variant="button" size="sm" color="text-black" text="Updating..." />
                 ) : (
-                  <Lock size={16} />
+                  <>
+                    <Lock size={16} />
+                    <span>Update Password</span>
+                  </>
                 )}
-                Update Password
               </button>
             </div>
           </form>
@@ -490,3 +495,4 @@ export default function Settings() {
     </div>
   );
 }
+

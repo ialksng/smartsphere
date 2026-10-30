@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Star, Trash2, Plus, Search, Cloud, Download, RefreshCw, X } from "lucide-react";
+import Loader from "../components/Loader";
 import apiClient from "../services/apiClient";
 
 const DocHub = () => {
@@ -157,7 +158,7 @@ const DocHub = () => {
         />
 
         {loading ? (
-          <p className="text-gray-400 animate-pulse">Searching documents...</p>
+          <Loader variant="section" size="md" text="Searching documents..." />
         ) : (
           <div className="space-y-3">
             {items.length === 0 ? (
@@ -319,9 +320,9 @@ const DocHub = () => {
               <button 
                 onClick={handleCreateDocument}
                 disabled={loading}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:text-gray-400 rounded-lg text-sm text-white font-medium transition-colors"
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:text-gray-400 rounded-lg text-sm text-white font-medium transition-colors inline-flex items-center justify-center gap-2"
               >
-                {loading ? "Creating..." : "Create & Open"}
+                {loading ? <Loader variant="button" size="sm" text="Creating..." /> : "Create & Open"}
               </button>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Cloud, HardDrive, ArrowRight, CheckCircle2 } from "lucide-react";
+import Loader from "../components/Loader";
 import apiClient from "../services/apiClient";
 
 export default function CloudHub() {
@@ -43,7 +44,11 @@ export default function CloudHub() {
           {isConnected ? "Connected to Google Drive" : "Connect Google Drive to expand your workspace beyond local 100 MB"}
         </p>
 
-        {isConnected ? (
+        {googleStorage === null ? (
+          <div className="py-2">
+            <Loader variant="inline" size="sm" text="Checking storage quota..." />
+          </div>
+        ) : isConnected ? (
           <p className="text-xl font-semibold">
             {formatGB(totalUsed)} GB / {formatGB(totalLimit)} GB
           </p>
@@ -78,7 +83,9 @@ export default function CloudHub() {
               {formatGB(googleStorage.used)} / {formatGB(googleStorage.total)} GB used
             </p>
           ) : (
-            <p className="text-sm text-gray-500 mt-2">Loading status...</p>
+            <div className="mt-2">
+              <Loader variant="inline" size="xs" text="Checking status..." />
+            </div>
           )}
 
           <div className="mt-4 flex items-center gap-2 text-xs text-blue-400 font-medium">

@@ -96,10 +96,26 @@ function App() {
             </ProtectedLayout>
           }
         />
+        <Route
+          path="/editor/:id"
+          element={
+            <ProtectedLayout>
+              <DocEditor />
+            </ProtectedLayout>
+          }
+        />
 
         {/* Supports state-based navigation (e.g. from MyStorage) */}
         <Route
           path="/doceditor"
+          element={
+            <ProtectedLayout>
+              <DocEditor />
+            </ProtectedLayout>
+          }
+        />
+        <Route
+          path="/editor"
           element={
             <ProtectedLayout>
               <DocEditor />

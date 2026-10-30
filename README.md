@@ -147,6 +147,16 @@ EMAIL_FROM=SmartSphere <no-reply@ialksng.me>
 EMAIL_REPLY_TO=no-reply@ialksng.me
 ```
 
+> [!NOTE]
+> **Google Cloud Console OAuth 2.0 Redirect URIs:**
+> To prevent `Error 400: redirect_uri_mismatch`, ensure the following **Authorized Redirect URIs** are registered in your Google Cloud Console OAuth Client:
+> - `https://ialksng.me/work/projects/smartsphere/app/api/cloud/google/callback`
+> - `https://smartsphere-drat.onrender.com/api/cloud/google/callback`
+> - `https://ialksng.me/work/projects/smartsphere/app/api/auth/google/callback`
+> - `https://smartsphere-drat.onrender.com/api/auth/google/callback`
+> - `http://localhost:5000/api/cloud/google/callback` (Local Development)
+> - `http://localhost:5000/api/auth/google/callback` (Local Development)
+
 #### **Client Environment:**
 Create `client/.env`:
 ```env

@@ -95,6 +95,7 @@ export default function MainLayout({ children }) {
             className="text-red-400 hover:text-red-300"
             onClick={() => {
               localStorage.removeItem('sphere_token');
+              localStorage.removeItem('userInfo');
               navigate('/auth');
             }}
           />

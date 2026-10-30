@@ -3,7 +3,6 @@ import ReactMarkdown from 'react-markdown';
 import {
   Send,
   Paperclip,
-  Loader2,
   FileText,
   FileUp,
   HardDrive,
@@ -14,6 +13,7 @@ import {
   Sparkles,
   Globe,
 } from 'lucide-react';
+import Loader from './Loader';
 import apiClient from '../services/apiClient';
 
 export default function ChatInterface({ onInsightAdded, initialFile, prefillQuery }) {
@@ -475,9 +475,7 @@ export default function ChatInterface({ onInsightAdded, initialFile, prefillQuer
             {/* Storage File List */}
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
               {isLoadingStorage ? (
-                <div className="flex justify-center py-10">
-                  <Loader2 className="animate-spin text-blue-400" size={24} />
-                </div>
+                <Loader variant="section" size="md" text="Loading local workspace files..." />
               ) : myStorageFiles.length === 0 ? (
                 <div className="text-center text-gray-500 py-10">Folder is empty</div>
               ) : (
@@ -564,9 +562,7 @@ export default function ChatInterface({ onInsightAdded, initialFile, prefillQuer
             {/* Drive File List */}
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
               {isLoadingDrive ? (
-                <div className="flex justify-center py-10">
-                  <Loader2 className="animate-spin text-amber-400" size={24} />
-                </div>
+                <Loader variant="section" size="md" color="text-amber-400" text="Loading Google Drive files..." />
               ) : driveFiles.length === 0 ? (
                 <div className="text-center text-gray-500 py-10">Folder is empty</div>
               ) : (
@@ -770,8 +766,8 @@ export default function ChatInterface({ onInsightAdded, initialFile, prefillQuer
         })}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="p-3 bg-white/10 border border-white/10 rounded-2xl text-sm flex items-center gap-2 text-gray-400">
-              <Loader2 className="animate-spin text-blue-400" size={16} /> Thinking with Groq...
+            <div className="p-3 bg-white/10 border border-white/10 rounded-2xl text-sm flex items-center">
+              <Loader variant="inline" size="sm" text="Thinking with Groq..." />
             </div>
           </div>
         )}
