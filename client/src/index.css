@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  --color-darkBg: #0f172a;
+  --color-glassBorder: rgba(255, 255, 255, 0.1);
+  --color-glassBg: rgba(30, 41, 59, 0.7);
+}
+
+body {
+  background-color: var(--color-darkBg);
+  color: white;
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+}
