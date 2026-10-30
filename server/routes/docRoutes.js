@@ -162,6 +162,18 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
+    // Enforce 100 MB local workspace quota
+    const currentUsage = await Document.aggregate([
+      { $match: { userId: req.user._id, isTrashed: false } },
+      { $group: { _id: null, total: { $sum: '$size' } } },
+    ]);
+    const totalBytes = (currentUsage[0]?.total || 0) + req.file.size;
+    if (totalBytes > 100 * 1024 * 1024) {
+      return res.status(400).json({
+        message: 'Local storage quota exceeded (100 MB limit). Please delete old documents or connect Google Drive for additional space.',
+      });
+    }
+
     const { parentId } = req.body;
     let extractedContent = '';
     const mimeType = req.file.mimetype || 'text/plain';

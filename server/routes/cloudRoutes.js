@@ -78,7 +78,7 @@ router.get('/google/storage', async (req, res) => {
     if (!user || !user.googleDriveTokens?.access_token) {
       return res.json({
         used: 0,
-        total: 15 * 1024 * 1024 * 1024,
+        total: 0,
         connected: false,
       });
     }
@@ -89,7 +89,7 @@ router.get('/google/storage', async (req, res) => {
     console.error('Get storage error:', error);
     return res.json({
       used: 0,
-      total: 15 * 1024 * 1024 * 1024,
+      total: 0,
       connected: false,
       error: error.message,
     });

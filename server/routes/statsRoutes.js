@@ -22,17 +22,21 @@ router.get('/', async (req, res) => {
       ]),
     ]);
 
+    const LOCAL_STORAGE_LIMIT_BYTES = 100 * 1024 * 1024; // 100 MB
     const bytes = totalStorage[0]?.totalBytes || 0;
-    const storageFormatted =
-      bytes > 1024 * 1024
-        ? `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-        : `${(bytes / 1024).toFixed(1)} KB`;
+    const usedMB = (bytes / (1024 * 1024)).toFixed(1);
+    const storageFormatted = `${usedMB} / 100 MB`;
+    const percentUsed = Math.min(100, Math.round((bytes / LOCAL_STORAGE_LIMIT_BYTES) * 100));
 
     return res.json({
       docs: docsCount,
       favorites: favoritesCount,
       chats: chatsCount,
       storage: storageFormatted,
+      storageBytes: bytes,
+      storageLimitBytes: LOCAL_STORAGE_LIMIT_BYTES,
+      storageUsedMB: usedMB,
+      storagePercent: percentUsed,
     });
   } catch (error) {
     console.error('Stats error:', error);

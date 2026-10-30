@@ -215,7 +215,8 @@ export default function MyStorage() {
     navigate(`/doceditor/${file._id}`);
   };
 
-  const percent = Math.min((used / (500 * 1024 * 1024)) * 100, 100);
+  const LOCAL_STORAGE_LIMIT = 100 * 1024 * 1024; // 100 MB Local Storage Quota
+  const percent = Math.min((used / LOCAL_STORAGE_LIMIT) * 100, 100);
 
   return (
     <div className="p-8">
@@ -235,7 +236,7 @@ export default function MyStorage() {
       <div className="mb-6">
         <div className="flex justify-between text-sm mb-1">
           <span>{(used / (1024 * 1024)).toFixed(1)} MB used</span>
-          <span>500 MB</span>
+          <span className="text-gray-400">100 MB Limit</span>
         </div>
         <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
           <div

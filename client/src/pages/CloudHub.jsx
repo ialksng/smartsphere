@@ -40,12 +40,18 @@ export default function CloudHub() {
         </div>
 
         <p className="text-sm text-gray-400 mb-2">
-          {isConnected ? "Connected to Google Drive" : "Connect Google Drive to sync and backup your documents"}
+          {isConnected ? "Connected to Google Drive" : "Connect Google Drive to expand your workspace beyond local 100 MB"}
         </p>
 
-        <p className="text-xl font-semibold">
-          {formatGB(totalUsed)} GB / {formatGB(totalLimit)} GB
-        </p>
+        {isConnected ? (
+          <p className="text-xl font-semibold">
+            {formatGB(totalUsed)} GB / {formatGB(totalLimit)} GB
+          </p>
+        ) : (
+          <div className="text-sm text-amber-300/90 font-medium">
+            Google Drive Not Linked • Link Google Drive below for 15 GB cloud sync
+          </div>
+        )}
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
@@ -87,12 +93,12 @@ export default function CloudHub() {
           <div className="flex items-center justify-between mb-3">
             <HardDrive className="text-emerald-400" size={28} />
             <span className="text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-              Active
+              100 MB Quota Active
             </span>
           </div>
           <h2 className="text-lg font-medium text-white group-hover:text-emerald-400 transition">Local MyStorage (MERN)</h2>
           <p className="text-sm text-gray-400 mt-2">
-            Organize personal documents, create folders, and sync to Cloud
+            Organize personal files, create folders, and manage local 100 MB workspace storage
           </p>
           <div className="mt-4 flex items-center gap-2 text-xs text-emerald-400 font-medium">
             Open MyStorage <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
