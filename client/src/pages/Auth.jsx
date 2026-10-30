@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Loader2, Lock, Mail, User, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Loader2, Lock, Mail, User, ArrowLeft, CheckCircle2, ExternalLink, Globe } from 'lucide-react';
 import apiClient, { getApiUrl } from '../services/apiClient';
 
 export default function Auth() {
@@ -91,6 +91,18 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen bg-[#0b0f1a] text-white flex items-center justify-center p-4 relative overflow-hidden">
+      {/* DEVELOPER PORTFOLIO LINK */}
+      <a
+        href="https://ialksng.me"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="absolute top-6 right-6 z-20 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-gray-300 hover:text-white transition shadow-lg backdrop-blur-md group"
+      >
+        <Globe size={13} className="text-blue-400 group-hover:rotate-12 transition-transform" />
+        <span className="font-medium">ialksng</span>
+        <ExternalLink size={12} className="text-gray-400 group-hover:text-white transition-colors" />
+      </a>
+
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px]"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-600/20 rounded-full blur-[120px]"></div>
 

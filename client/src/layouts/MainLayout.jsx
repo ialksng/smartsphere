@@ -6,7 +6,9 @@ import {
   Bot,
   Settings,
   LogOut,
-  HardDrive
+  HardDrive,
+  ExternalLink,
+  Globe
 } from "lucide-react";
 
 export default function MainLayout({ children }) {
@@ -66,6 +68,20 @@ export default function MainLayout({ children }) {
 
         {/* BOTTOM SECTION */}
         <div className="p-4 border-t border-white/10 space-y-2">
+
+          {/* DEVELOPER PORTFOLIO LINK */}
+          <a
+            href="https://ialksng.me"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-gradient-to-r from-blue-600/20 via-indigo-600/20 to-purple-600/20 hover:from-blue-600/30 hover:to-purple-600/30 text-blue-300 hover:text-white border border-blue-500/30 transition text-sm font-medium group"
+          >
+            <div className="flex items-center gap-2">
+              <Globe size={16} className="text-blue-400 group-hover:rotate-12 transition-transform" />
+              <span>ialksng</span>
+            </div>
+            <ExternalLink size={13} className="text-gray-400 group-hover:text-white transition-colors" />
+          </a>
 
           <NavItem
             icon={<Settings size={18} />}
