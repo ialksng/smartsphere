@@ -202,7 +202,7 @@ router.post('/reset-password/:token', async (req, res) => {
 router.get('/google', (req, res) => {
   const redirectUri =
     process.env.GOOGLE_AUTH_REDIRECT_URI ||
-    'http://localhost:5000/api/auth/google/callback';
+    'https://ialksng.me/work/projects/smartsphere/app/api/auth/google/callback';
 
   const oauth2Client = createOAuth2Client(redirectUri);
   const url = oauth2Client.generateAuthUrl({
@@ -231,7 +231,7 @@ router.get('/google/callback', async (req, res) => {
   try {
     const redirectUri =
       process.env.GOOGLE_AUTH_REDIRECT_URI ||
-      'http://localhost:5000/api/auth/google/callback';
+      'https://ialksng.me/work/projects/smartsphere/app/api/auth/google/callback';
 
     const oauth2Client = createOAuth2Client(redirectUri);
     const { tokens } = await oauth2Client.getToken(code);

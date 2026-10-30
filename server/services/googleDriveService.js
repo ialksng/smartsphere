@@ -8,7 +8,7 @@ export const createOAuth2Client = (redirectUri = null) => {
   return new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    redirectUri || process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/api/cloud/google/callback'
+    redirectUri || process.env.GOOGLE_REDIRECT_URI || 'https://ialksng.me/work/projects/smartsphere/app/api/cloud/google/callback'
   );
 };
 

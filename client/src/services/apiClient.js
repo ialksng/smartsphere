@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || 'https://smartsphere-drat.onrender.com/api';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -31,7 +32,7 @@ apiClient.interceptors.request.use(
 
 /**
  * Helper to construct an absolute or proxy API URL for fetch or anchor links
- * e.g. getApiUrl('/cloud/google/auth') -> 'http://localhost:5000/api/cloud/google/auth' or '/api/cloud/google/auth'
+ * e.g. getApiUrl('/auth/google') -> 'https://smartsphere-drat.onrender.com/api/auth/google'
  */
 export const getApiUrl = (path) => {
   const base = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
