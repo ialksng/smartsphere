@@ -2,14 +2,14 @@ import mongoose from 'mongoose';
 
 export const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/smartsphere');
+    const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/smartsphere';
+    const conn = await mongoose.connect(mongoUri);
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`❌ MongoDB Connection Error: ${error.message}`);
-    // Don't kill process immediately in dev so developers see the exact error
-    if (process.env.NODE_ENV === 'production') {
-      process.exit(1);
-    }
+    // Do not crash process so web server stays alive on cloud hosts (e.g. Render)
+    console.warn('⚠️ Server will continue running; please verify MONGO_URI in environment variables.');
   }
 };
+
 
