@@ -76,9 +76,9 @@ const DocEditor = () => {
 
   useEffect(() => {
     if (editor && selectedFile && selectedFile.content !== undefined) {
-      const contentToSet = selectedFile.content.includes("<")
+      const contentToSet = selectedFile.content?.includes("<")
         ? selectedFile.content
-        : `<p>${selectedFile.content.replace(/\n/g, "<br>")}</p>`;
+        : `<p>${(selectedFile.content || '').replace(/\n/g, "<br>")}</p>`;
 
       editor.commands.setContent(contentToSet);
     }
@@ -212,7 +212,7 @@ const DocEditor = () => {
         <div className="flex-1 bg-white/5 border border-white/10 rounded-xl overflow-hidden relative flex flex-col min-w-0 shadow-lg">
           {selectedFile.contentType === "pdf" && selectedFile.fileUrl ? (
             <iframe
-              src={selectedFile.fileUrl.replace(/\/view.*$/, "/preview")}
+              src={selectedFile.fileUrl?.replace(/\/view.*$/, "/preview") || ''}
               className="w-full h-full bg-white border-0"
               title="PDF Preview"
             />

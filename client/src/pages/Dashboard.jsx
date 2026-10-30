@@ -232,7 +232,7 @@ export default function Dashboard() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-sm font-medium w-full">
-                        {(doc.source === 'google_drive_live' || doc.source === 'onedrive_live') ? (
+                        {(doc.source === 'google_drive_live' || doc.source === 'onedrive_live' || doc.cloudProvider === 'google') ? (
                           <Cloud size={16} className="text-blue-400 flex-shrink-0" />
                         ) : (
                           <FileText size={16} className="text-white flex-shrink-0" />
@@ -247,12 +247,12 @@ export default function Dashboard() {
                     
                     <div className="pl-6 text-xs text-gray-400 truncate flex items-center">
                       <span className={`uppercase text-[10px] px-1.5 py-0.5 rounded mr-2 ${doc.isExternal ? 'bg-blue-500/20 text-blue-300' : 'bg-white/10'}`}>
-                        {doc.source.replace('_live', '')}
+                        {(doc.source || doc.cloudProvider || 'doc').replace('_live', '')}
                       </span>
                       {doc.isExternal ? (
                         <span className="flex items-center gap-1"><DownloadCloud size={10} /> Click to import to DocHub</span>
                       ) : (
-                        doc.summary || "Imported Document"
+                        doc.summary || "Workspace Document"
                       )}
                     </div>
                   </li>

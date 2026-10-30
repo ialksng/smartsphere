@@ -174,7 +174,7 @@ const DocHub = () => {
                       {file.isFavorite && <Star size={14} className="text-yellow-400" fill="currentColor" />}
                     </p>
                     <p className="text-xs text-gray-400 mt-1">
-                      {getSourceIcon(file.source)} <span className="uppercase">{file.source.replace(/_/g, ' ')}</span> 
+                      {getSourceIcon(file.source || file.cloudProvider)} <span className="uppercase">{(file.source || file.cloudProvider || 'local').replace(/_/g, ' ')}</span> 
                       {file.size !== undefined && ` • ${file.size} Bytes`}
                     </p>
                   </div>
