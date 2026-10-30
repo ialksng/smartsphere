@@ -5,6 +5,7 @@
   "type": "module",
   "description": "SmartSphere AI Workspace - MERN Stack Monorepo",
   "main": "server.js",
+  "license": "MIT",
   "scripts": {
     "start": "node server.js",
     "build": "npm --prefix client run build",
