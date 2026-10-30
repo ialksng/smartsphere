@@ -6,6 +6,7 @@ import { google } from 'googleapis';
 import User from '../models/User.js';
 import { generateToken, protect } from '../middleware/auth.js';
 import { createOAuth2Client } from '../services/googleDriveService.js';
+import { connectDB, getMongoUri, dbConnectionError } from '../config/db.js';
 
 const router = express.Router();
 
@@ -281,7 +282,16 @@ router.get('/google/callback', async (req, res) => {
 
   try {
     if (mongoose.connection.readyState !== 1) {
-      throw new Error('Database is not connected. Please add MONGO_URI to your Render environment variables.');
+      if (getMongoUri()) {
+        try {
+          await connectDB();
+        } catch (e) {}
+      }
+    }
+
+    if (mongoose.connection.readyState !== 1) {
+      const detail = dbConnectionError || 'Please check MONGO_URI and IP access list (0.0.0.0/0).';
+      throw new Error(`Database not connected: ${detail}`);
     }
 
     const redirectUri =
