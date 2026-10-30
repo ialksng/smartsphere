@@ -9,6 +9,14 @@
       "destination": "https://smartsphere-drat.onrender.com/api/$1"
     },
     {
+      "source": "/work/projects/smartsphere/app/assets/(.*)",
+      "destination": "/assets/$1"
+    },
+    {
+      "source": "/assets/(.*)",
+      "destination": "/assets/$1"
+    },
+    {
       "source": "/work/projects/smartsphere/app/(.*)",
       "destination": "/index.html"
     },

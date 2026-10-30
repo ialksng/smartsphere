@@ -23,9 +23,19 @@ const ProtectedLayout = ({ children }) => (
   </ProtectedRoute>
 );
 
+const getBasename = () => {
+  if (
+    typeof window !== 'undefined' &&
+    window.location.pathname.startsWith('/work/projects/smartsphere/app')
+  ) {
+    return '/work/projects/smartsphere/app';
+  }
+  return '';
+};
+
 function App() {
   return (
-    <BrowserRouter basename={import.meta.env.BASE_URL}>
+    <BrowserRouter basename={getBasename()}>
       <Routes>
         <Route path="/" element={<Navigate to="/auth" replace />} />
         <Route path="/auth" element={<Auth />} />
