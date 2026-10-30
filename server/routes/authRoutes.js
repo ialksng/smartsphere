@@ -250,8 +250,6 @@ router.get('/google', (req, res) => {
 
   const oauth2Client = createOAuth2Client(redirectUri);
   const url = oauth2Client.generateAuthUrl({
-    access_type: 'offline',
-    prompt: 'consent',
     scope: [
       'openid',
       'https://www.googleapis.com/auth/userinfo.profile',
@@ -302,7 +300,7 @@ router.get('/google/callback', async (req, res) => {
         email,
         googleId,
         avatar: picture || '',
-        googleDriveTokens: tokens,
+        googleDriveTokens: tokens.scope && tokens.scope.includes('drive') ? tokens : undefined,
       });
     }
 
