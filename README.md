@@ -12,8 +12,6 @@
 
 - 🚀 **Live Application:** [https://ialksng.me/work/projects/smartsphere/app](https://ialksng.me/work/projects/smartsphere/app)
 - 👨‍💻 **Developer Portfolio:** [https://ialksng.me](https://ialksng.me) (Alok Singh)
-- 📡 **Render Backend API:** `https://smartsphere-drat.onrender.com`
-- 💻 **Vercel Client App:** `https://smartsphere-pearl.vercel.app`
 
 ---
 
