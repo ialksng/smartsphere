@@ -35,7 +35,7 @@ export default function Auth() {
       );
       navigate('/dashboard', { replace: true });
     } else if (authError) {
-      setError('Google Sign-In failed or was cancelled. Please try again.');
+      setError(`Google Sign-In failed: ${decodeURIComponent(authError)}`);
     }
   }, [searchParams, navigate]);
 

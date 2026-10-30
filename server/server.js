@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import { connectDB } from './config/db.js';
 
 import authRoutes from './routes/authRoutes.js';
@@ -54,11 +55,20 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/api/health', (req, res) => {
+  const dbStates = ['disconnected', 'connected', 'connecting', 'disconnecting'];
   res.json({
     status: 'ok',
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
     service: 'SmartSphere MERN API',
+    database: dbStates[mongoose.connection.readyState] || 'unknown',
+    env: {
+      hasMongoUri: !!process.env.MONGO_URI,
+      hasGoogleClientId: !!process.env.GOOGLE_CLIENT_ID,
+      hasGoogleClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
+      hasJwtSecret: !!process.env.JWT_SECRET,
+      frontendUrl: process.env.FRONTEND_URL || 'default',
+    },
   });
 });
 

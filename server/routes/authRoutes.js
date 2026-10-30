@@ -314,7 +314,8 @@ router.get('/google/callback', async (req, res) => {
     );
   } catch (error) {
     console.error('Google Auth callback error:', error);
-    return res.redirect(`${frontendUrl}/auth?error=google_auth_failed`);
+    const errText = encodeURIComponent(error.message || 'google_auth_failed');
+    return res.redirect(`${frontendUrl}/auth?error=${errText}`);
   }
 });
 
