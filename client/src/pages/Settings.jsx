@@ -17,10 +17,12 @@ import {
   Lock,
 } from 'lucide-react';
 import Loader from '../components/Loader';
+import { useToast } from '../context/ToastContext';
 import apiClient from '../services/apiClient';
 
 export default function Settings() {
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState(null);
@@ -137,16 +139,16 @@ export default function Settings() {
   };
 
   const handleDisconnectDrive = async () => {
-    if (!confirm('Are you sure you want to disconnect Google Drive?')) return;
+    if (!window.confirm('Are you sure you want to disconnect Google Drive?')) return;
 
     setIsDisconnectingDrive(true);
     try {
       await apiClient.post('/cloud/google/disconnect');
       fetchGoogleStorage();
-      alert('Google Drive disconnected.');
+      toast.info('Google Drive disconnected.');
     } catch (err) {
       console.error('Disconnect error:', err);
-      alert('Failed to disconnect Google Drive.');
+      toast.error('Failed to disconnect Google Drive.');
     } finally {
       setIsDisconnectingDrive(false);
     }

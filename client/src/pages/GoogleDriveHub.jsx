@@ -11,10 +11,12 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import Loader from '../components/Loader';
+import { useToast } from '../context/ToastContext';
 import apiClient from '../services/apiClient';
 
 export default function GoogleDriveHub() {
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [driveFiles, setDriveFiles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -83,6 +85,7 @@ export default function GoogleDriveHub() {
       const importedDoc = data.insight || data.file;
 
       if (importedDoc) {
+        toast.success(`Imported "${importedDoc.filename}" from Google Drive!`);
         if (target === 'dochub') {
           navigate('/doceditor', { state: { docId: importedDoc._id } });
         }
@@ -90,11 +93,11 @@ export default function GoogleDriveHub() {
           navigate('/buddybot', { state: { importedFile: importedDoc } });
         }
       } else {
-        alert('Import completed, but no document metadata returned.');
+        toast.error('Import completed, but no document metadata returned.');
       }
     } catch (err) {
       console.error('Import error:', err);
-      alert(err.response?.data?.message || 'Import failed. Please check connection.');
+      toast.error(err.response?.data?.message || 'Import failed. Please check connection.');
     } finally {
       setImportingFileId(null);
     }
@@ -103,7 +106,10 @@ export default function GoogleDriveHub() {
   const handleConnectGoogle = async () => {
     try {
       const token = localStorage.getItem('sphere_token');
-      if (!token) return alert('Please log in first.');
+      if (!token) {
+        toast.warning('Please log in first.');
+        return;
+      }
 
       let userId = '';
       try {
@@ -118,11 +124,11 @@ export default function GoogleDriveHub() {
       if (res.data?.url) {
         window.location.href = res.data.url;
       } else {
-        alert('Failed to get authentication URL.');
+        toast.error('Failed to get authentication URL.');
       }
     } catch (err) {
       console.error('Auth error:', err);
-      alert(err.response?.data?.message || 'Error connecting to Google Drive.');
+      toast.error(err.response?.data?.message || 'Error connecting to Google Drive.');
     }
   };
 

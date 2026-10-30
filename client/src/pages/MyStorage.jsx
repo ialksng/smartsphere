@@ -12,12 +12,17 @@ import {
   CloudDownload,
   CloudUpload,
   Bot,
+  Trash2,
 } from "lucide-react";
 import Loader from "../components/Loader";
+import DriveFolderPickerModal from "../components/DriveFolderPickerModal";
+import InputDialogModal from "../components/InputDialogModal";
+import { useToast } from "../context/ToastContext";
 import apiClient from "../services/apiClient";
 
 export default function MyStorage() {
   const navigate = useNavigate();
+  const toast = useToast();
 
   // Unified Storage State
   const [items, setItems] = useState([]);
@@ -30,8 +35,29 @@ export default function MyStorage() {
 
   // UI States
   const [showUploadMenu, setShowUploadMenu] = useState(false);
-  const [exportMenuId, setExportMenuId] = useState(null);
   const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0, file: null });
+
+  // Floating Google Drive Folder Picker Modal State
+  const [drivePickerModal, setDrivePickerModal] = useState({
+    isOpen: false,
+    item: null,
+    type: 'file',
+  });
+
+  // Reusable Dialog Modal State (for Folder, File, Rename, Delete)
+  const [inputModal, setInputModal] = useState({
+    isOpen: false,
+    title: '',
+    description: '',
+    placeholder: '',
+    defaultValue: '',
+    confirmText: 'Confirm',
+    icon: null,
+    iconColor: 'text-blue-400',
+    isDestructive: false,
+    isPromptOnly: false,
+    onSubmit: null,
+  });
 
   const uploadMenuRef = useRef(null);
 
@@ -40,7 +66,6 @@ export default function MyStorage() {
 
     const handleClickOutside = (e) => {
       setContextMenu({ visible: false, x: 0, y: 0, file: null });
-      setExportMenuId(null);
       if (uploadMenuRef.current && !uploadMenuRef.current.contains(e.target)) {
         setShowUploadMenu(false);
       }
@@ -64,48 +89,74 @@ export default function MyStorage() {
       }
     } catch (error) {
       console.error("Error fetching storage data:", error);
+      toast.error("Failed to load workspace files.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateFolder = async () => {
-    const name = prompt("Enter folder name:");
-    if (!name) return;
-
-    try {
-      await apiClient.post("/folders", {
-        name,
-        parent: currentFolder.id,
-      });
-      fetchData(currentFolder.id);
-    } catch (err) {
-      console.error("Error creating folder:", err);
-      alert(err.response?.data?.message || "Failed to create folder");
-    }
+  const handleCreateFolder = () => {
+    setInputModal({
+      isOpen: true,
+      title: "Create New Folder",
+      description: "Organize files inside your 100 MB workspace",
+      placeholder: "Folder name (e.g., Invoices, Docs)",
+      defaultValue: "",
+      confirmText: "Create Folder",
+      icon: FolderPlus,
+      iconColor: "text-emerald-400",
+      isDestructive: false,
+      isPromptOnly: false,
+      onSubmit: async (name) => {
+        try {
+          await apiClient.post("/folders", {
+            name,
+            parent: currentFolder.id,
+          });
+          toast.success(`Folder "${name}" created successfully!`);
+          fetchData(currentFolder.id);
+        } catch (err) {
+          console.error("Error creating folder:", err);
+          toast.error(err.response?.data?.message || "Failed to create folder");
+        }
+      },
+    });
   };
 
-  const handleCreateFile = async () => {
-    const name = prompt("Enter file name (e.g., document.txt):");
-    if (!name) return;
-
-    try {
-      await apiClient.post("/dochub/file", {
-        filename: name,
-        content: "",
-        parentId: currentFolder.id,
-      });
-      fetchData(currentFolder.id);
-    } catch (err) {
-      console.error("Error creating file:", err);
-      alert(err.response?.data?.message || "Failed to create file");
-    }
+  const handleCreateFile = () => {
+    setInputModal({
+      isOpen: true,
+      title: "Create New File",
+      description: "Create an empty document in this directory",
+      placeholder: "File name (e.g., notes.txt, memo.md)",
+      defaultValue: "",
+      confirmText: "Create File",
+      icon: FilePlus,
+      iconColor: "text-blue-400",
+      isDestructive: false,
+      isPromptOnly: false,
+      onSubmit: async (name) => {
+        try {
+          await apiClient.post("/dochub/file", {
+            filename: name,
+            content: "",
+            parentId: currentFolder.id,
+          });
+          toast.success(`File "${name}" created successfully!`);
+          fetchData(currentFolder.id);
+        } catch (err) {
+          console.error("Error creating file:", err);
+          toast.error(err.response?.data?.message || "Failed to create file");
+        }
+      },
+    });
   };
 
   const handleUpload = async (e) => {
     const selectedFiles = e.target.files;
     if (!selectedFiles.length) return;
 
+    let successCount = 0;
     for (let i = 0; i < selectedFiles.length; i++) {
       const formData = new FormData();
       if (currentFolder.id) formData.append("parentId", currentFolder.id);
@@ -115,36 +166,46 @@ export default function MyStorage() {
         await apiClient.post("/dochub/upload", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
+        successCount++;
       } catch (err) {
         console.error("Upload error:", err);
+        toast.error(err.response?.data?.message || `Failed to upload ${selectedFiles[i].name}`);
       }
+    }
+
+    if (successCount > 0) {
+      toast.success(`Uploaded ${successCount} file(s) successfully!`);
     }
     fetchData(currentFolder.id);
     setShowUploadMenu(false);
   };
 
-  const pushToCloud = async (itemId, type, provider) => {
+  const pushToCloud = (item, type, provider = "google") => {
     if (provider !== "google") {
-      alert(`${provider} export not supported. Google Drive is connected.`);
-      setExportMenuId(null);
+      toast.warning(`${provider} export not supported. Google Drive is connected.`);
       return;
     }
 
-    const targetDriveFolderId =
-      prompt("Enter Google Drive Folder ID to save to (leave blank for root):") || "root";
+    setDrivePickerModal({
+      isOpen: true,
+      item,
+      type,
+    });
+  };
 
-    try {
-      const res = await apiClient.post("/cloud/google/upload-local", {
-        itemId,
-        type,
-        driveFolderId: targetDriveFolderId,
-      });
-      alert(res.data?.message || "Uploaded to Google Drive Successfully!");
-    } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Error uploading to Google Drive.");
-    }
-    setExportMenuId(null);
+  const handleConfirmDriveSync = async (driveFolderId, folderName) => {
+    if (!drivePickerModal.item) return;
+
+    const res = await apiClient.post("/cloud/google/upload-local", {
+      itemId: drivePickerModal.item._id,
+      type: drivePickerModal.type,
+      driveFolderId,
+    });
+
+    toast.success(
+      res.data?.message ||
+        `Successfully synced "${drivePickerModal.item.filename}" to Google Drive (${folderName})!`
+    );
   };
 
   const sendToBuddyBot = (file) => {
@@ -157,20 +218,34 @@ export default function MyStorage() {
     setContextMenu({ visible: true, x: e.pageX, y: e.pageY, file });
   };
 
-  const handleRename = async () => {
+  const handleRename = () => {
     if (!contextMenu.file) return;
-    const newName = prompt("Enter new name:", contextMenu.file.filename);
-    if (!newName) return;
+    const targetFile = contextMenu.file;
 
-    try {
-      await apiClient.put(`/dochub/${contextMenu.file._id}`, {
-        name: newName,
-      });
-      fetchData(currentFolder.id);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to rename item");
-    }
+    setInputModal({
+      isOpen: true,
+      title: "Rename Item",
+      description: "Change name for this file or folder",
+      placeholder: "New name",
+      defaultValue: targetFile.filename,
+      confirmText: "Save Name",
+      icon: FileText,
+      iconColor: "text-amber-400",
+      isDestructive: false,
+      isPromptOnly: false,
+      onSubmit: async (newName) => {
+        try {
+          await apiClient.put(`/dochub/${targetFile._id}`, {
+            name: newName,
+          });
+          toast.success(`Renamed to "${newName}"`);
+          fetchData(currentFolder.id);
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to rename item");
+        }
+      },
+    });
   };
 
   const handleDownload = () => {
@@ -182,22 +257,36 @@ export default function MyStorage() {
       a.href = url;
       a.download = contextMenu.file.filename;
       a.click();
+      toast.success(`Downloading "${contextMenu.file.filename}"`);
     } else {
-      alert("File content unavailable for direct download.");
+      toast.warning("File content unavailable for direct text download.");
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!contextMenu.file) return;
-    if (!window.confirm("Move to Trash?")) return;
+    const targetFile = contextMenu.file;
 
-    try {
-      await apiClient.delete(`/dochub/${contextMenu.file._id}`);
-      fetchData(currentFolder.id);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete item");
-    }
+    setInputModal({
+      isOpen: true,
+      title: "Move to Trash?",
+      description: `Are you sure you want to move "${targetFile.filename}" to trash?`,
+      confirmText: "Move to Trash",
+      icon: Trash2,
+      iconColor: "text-rose-400",
+      isDestructive: true,
+      isPromptOnly: true,
+      onSubmit: async () => {
+        try {
+          await apiClient.delete(`/dochub/${targetFile._id}`);
+          toast.info(`"${targetFile.filename}" moved to Trash`);
+          fetchData(currentFolder.id);
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to delete item");
+        }
+      },
+    });
   };
 
   const openFolder = (folder) => {
@@ -369,23 +458,12 @@ export default function MyStorage() {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setExportMenuId(exportMenuId === folder._id ? null : folder._id);
+                    pushToCloud(folder, "folder", "google");
                   }}
                   className="mt-3 text-xs text-emerald-400 text-left hover:text-emerald-300 transition flex items-center gap-1 opacity-0 group-hover:opacity-100"
                 >
-                  <CloudUpload size={14} /> Sync to Cloud
+                  <CloudUpload size={14} /> Sync to Drive
                 </button>
-
-                {exportMenuId === folder._id && (
-                  <div className="absolute bottom-10 left-4 bg-[#1a2235] border border-white/10 rounded shadow-lg z-10 w-40 overflow-hidden">
-                    <button
-                      onClick={() => pushToCloud(folder._id, "folder", "google")}
-                      className="w-full text-left px-3 py-2 text-xs hover:bg-white/5"
-                    >
-                      Google Drive
-                    </button>
-                  </div>
-                )}
               </div>
             ))}
 
@@ -410,11 +488,11 @@ export default function MyStorage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setExportMenuId(exportMenuId === file._id ? null : file._id);
+                      pushToCloud(file, "file", "google");
                     }}
                     className="text-xs text-blue-400 text-left hover:text-blue-300 transition flex items-center gap-1"
                   >
-                    <CloudUpload size={14} /> Sync to Cloud
+                    <CloudUpload size={14} /> Sync to Drive
                   </button>
                   <button
                     onClick={(e) => {
@@ -426,17 +504,6 @@ export default function MyStorage() {
                     <Bot size={14} /> Send to AI Assistant
                   </button>
                 </div>
-
-                {exportMenuId === file._id && (
-                  <div className="absolute bottom-10 left-4 bg-[#1a2235] border border-white/10 rounded shadow-lg z-10 w-40 overflow-hidden">
-                    <button
-                      onClick={() => pushToCloud(file._id, "file", "google")}
-                      className="w-full text-left px-3 py-2 text-xs hover:bg-white/5"
-                    >
-                      Google Drive
-                    </button>
-                  </div>
-                )}
               </div>
             ))}
         </div>
@@ -470,6 +537,30 @@ export default function MyStorage() {
           </button>
         </div>
       )}
+
+      {/* FLOATING GOOGLE DRIVE FOLDER PICKER MODAL */}
+      <DriveFolderPickerModal
+        isOpen={drivePickerModal.isOpen}
+        onClose={() => setDrivePickerModal((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={handleConfirmDriveSync}
+        item={drivePickerModal.item}
+      />
+
+      {/* REUSABLE INPUT / CONFIRMATION MODAL */}
+      <InputDialogModal
+        isOpen={inputModal.isOpen}
+        onClose={() => setInputModal((prev) => ({ ...prev, isOpen: false }))}
+        onSubmit={inputModal.onSubmit}
+        title={inputModal.title}
+        description={inputModal.description}
+        placeholder={inputModal.placeholder}
+        defaultValue={inputModal.defaultValue}
+        confirmText={inputModal.confirmText}
+        icon={inputModal.icon}
+        iconColor={inputModal.iconColor}
+        isDestructive={inputModal.isDestructive}
+        isPromptOnly={inputModal.isPromptOnly}
+      />
     </div>
   );
 }

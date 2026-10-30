@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Cloud, Bot, Plus, Search, Star, DownloadCloud, Sparkles, ArrowRight } from 'lucide-react';
 import Loader from '../components/Loader';
+import { useToast } from '../context/ToastContext';
 import apiClient from '../services/apiClient';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -139,11 +141,11 @@ export default function Dashboard() {
         setSearch("");
         navigate('/doceditor', { state: { docId: res.data.insight._id } });
       } else {
-        alert(res.data.message || "Failed to import file");
+        toast.error(res.data.message || "Failed to import file");
       }
     } catch (err) {
       console.error("Import error:", err);
-      alert("Error importing cloud file");
+      toast.error("Error importing cloud file");
     } finally {
       setImportingFileId(null);
     }

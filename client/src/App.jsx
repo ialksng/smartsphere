@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ToastProvider } from './context/ToastContext';
 
 import Auth from './pages/Auth';
 import ResetPassword from './pages/ResetPassword';
@@ -36,8 +37,9 @@ const getBasename = () => {
 
 function App() {
   return (
-    <BrowserRouter basename={getBasename()}>
-      <Routes>
+    <ToastProvider>
+      <BrowserRouter basename={getBasename()}>
+        <Routes>
         <Route path="/" element={<Navigate to="/auth" replace />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
@@ -144,6 +146,7 @@ function App() {
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
+  </ToastProvider>
   );
 }
 

@@ -5,11 +5,13 @@ import ReactMarkdown from 'react-markdown';
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Loader from "../components/Loader";
+import { useToast } from "../context/ToastContext";
 import apiClient from "../services/apiClient";
 
 const DocEditor = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const toast = useToast();
   // Extract the document ID directly from the URL (e.g., /doceditor/12345)
   const { id } = useParams();
 
@@ -62,11 +64,12 @@ const DocEditor = () => {
             },
           ]);
         } else {
-          alert("Could not load file content.");
+          toast.error("Could not load file content.");
           navigate("/dochub");
         }
       } catch (err) {
         console.error("Failed to load document", err);
+        toast.error("Failed to load document.");
         navigate("/dochub");
       } finally {
         setLoading(false);
@@ -93,10 +96,10 @@ const DocEditor = () => {
       await apiClient.put(`/dochub/${selectedFile._id}`, {
         content: editor.getHTML(),
       });
-      alert("Saved locally successfully!");
+      toast.success("Saved document locally!");
     } catch (err) {
       console.error(err);
-      alert("Failed to save.");
+      toast.error("Failed to save changes.");
     } finally {
       setSaving(false);
     }
@@ -110,10 +113,10 @@ const DocEditor = () => {
         fileName: selectedFile.filename,
         content: editor?.getHTML() || selectedFile.content,
       });
-      alert("Synced edits to Google Drive successfully!");
+      toast.success("Synced edits to Google Drive successfully!");
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Failed to sync to cloud.");
+      toast.error(err.response?.data?.message || "Failed to sync to cloud.");
     }
   };
 

@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Star, Trash2, Plus, Search, Cloud, Download, RefreshCw, X } from "lucide-react";
 import Loader from "../components/Loader";
+import { useToast } from "../context/ToastContext";
 import apiClient from "../services/apiClient";
 
 const DocHub = () => {
   const navigate = useNavigate();
+  const toast = useToast();
   const [items, setItems] = useState([]);
   const [view, setView] = useState("home");
   const [search, setSearch] = useState("");
@@ -64,7 +66,7 @@ const DocHub = () => {
 
   const handleCreateDocument = async () => {
     if (!docName.trim()) {
-      alert("Please provide a document name.");
+      toast.warning("Please provide a document name.");
       return;
     }
 
@@ -79,10 +81,11 @@ const DocHub = () => {
 
       setIsModalOpen(false);
       setDocName("");
+      toast.success(`Created document "${newFile.filename || docName}"`);
       navigate(`/doceditor/${newFile._id}`);
     } catch (err) {
       console.error("Failed to create file", err);
-      alert("Failed to create document.");
+      toast.error("Failed to create document.");
     } finally {
       setLoading(false);
     }
