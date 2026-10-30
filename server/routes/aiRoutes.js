@@ -4,46 +4,118 @@ import Document from '../models/Document.js';
 import ChatMessage from '../models/ChatMessage.js';
 import { protect } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
-import { askGroq, summarizeDocument } from '../services/groqService.js';
+import {
+  askGroq,
+  summarizeDocument,
+  answerSearchQuery,
+  askWithDocAwareness,
+} from '../services/groqService.js';
 
 const router = express.Router();
 router.use(protect);
 
-// @desc    Chat with Grok AI
+// @desc    Chat with AI Assistant (Full workspace document awareness & context awareness)
 // @route   POST /api/ai/chat
 router.post('/chat', async (req, res) => {
   try {
-    const { message, history = [], docContent = '', fileId } = req.body;
+    const { message, history = [], docContent = '', fileId, fileName } = req.body;
 
     if (!message && !docContent) {
       return res.status(400).json({ message: 'Prompt message is required' });
     }
 
-    let contextualPrompt = message || 'Please analyze this document.';
-    if (docContent && !contextualPrompt.includes(docContent.slice(0, 50))) {
-      contextualPrompt = `Document Content:\n"""\n${docContent.slice(0, 6000)}\n"""\n\nQuestion: ${message}`;
+    // Retrieve active document if specified
+    let activeDoc = null;
+    if (fileId) {
+      activeDoc = await Document.findOne({ _id: fileId, userId: req.user._id });
+    } else if (docContent) {
+      activeDoc = {
+        filename: fileName || 'Active Document',
+        content: docContent,
+        summary: '',
+      };
     }
+
+    // Scan all active documents across the workspace for deep context awareness
+    const workspaceDocs = await Document.find({
+      userId: req.user._id,
+      isTrashed: false,
+    })
+      .select('filename summary content updatedAt')
+      .sort({ updatedAt: -1 })
+      .limit(12);
 
     // Save user message to history
     await ChatMessage.create({
       userId: req.user._id,
       role: 'user',
       text: message || 'Document query',
+      fileName: activeDoc?.filename || undefined,
     });
 
-    const reply = await askGroq(contextualPrompt, history);
+    const reply = await askWithDocAwareness({
+      prompt: message || 'Please analyze this document.',
+      history,
+      activeDoc,
+      workspaceDocs,
+    });
 
     // Save AI response to history
     await ChatMessage.create({
       userId: req.user._id,
       role: 'ai',
       text: reply,
+      fileName: activeDoc?.filename || undefined,
     });
 
-    return res.json({ reply });
+    return res.json({
+      reply,
+      activeDoc: activeDoc ? { id: activeDoc._id, filename: activeDoc.filename } : null,
+      scannedDocsCount: workspaceDocs.length,
+    });
   } catch (error) {
     console.error('AI chat error:', error);
     return res.status(500).json({ message: error.message || 'Error processing AI chat' });
+  }
+});
+
+// @desc    AI Search Insight across all workspace documents
+// @route   GET /api/ai/search-insight
+router.get('/search-insight', async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q || !q.trim()) {
+      return res.json({ answer: '', documents: [] });
+    }
+
+    const regex = new RegExp(q.trim(), 'i');
+
+    // Scan through all documents in the user's workspace
+    const matchingDocs = await Document.find({
+      userId: req.user._id,
+      isTrashed: false,
+      $or: [{ filename: regex }, { content: regex }, { summary: regex }],
+    })
+      .select('filename summary content cloudProvider updatedAt')
+      .sort({ updatedAt: -1 })
+      .limit(6);
+
+    const answer = await answerSearchQuery(q.trim(), matchingDocs);
+
+    return res.json({
+      answer,
+      documents: matchingDocs.map((d) => ({
+        _id: d._id,
+        filename: d.filename,
+        summary: d.summary,
+        cloudProvider: d.cloudProvider,
+        updatedAt: d.updatedAt,
+      })),
+    });
+  } catch (error) {
+    console.error('AI search insight error:', error);
+    return res.status(500).json({ message: error.message || 'Error generating search insight' });
   }
 });
 

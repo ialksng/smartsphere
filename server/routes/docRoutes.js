@@ -124,10 +124,20 @@ router.post('/file', async (req, res) => {
       return res.status(400).json({ message: 'Filename is required' });
     }
 
+    let summary = '';
+    if (content && content.trim().length > 20) {
+      try {
+        summary = await summarizeDocument(filename, content);
+      } catch (sumErr) {
+        console.warn('Auto-summary warning on create:', sumErr.message);
+      }
+    }
+
     const doc = await Document.create({
       userId: req.user._id,
       filename,
       content,
+      summary,
       size: Buffer.byteLength(content || '', 'utf-8'),
       parentId: parentId || null,
       mimeType: filename.endsWith('.json')
@@ -207,6 +217,13 @@ router.put('/:id', async (req, res) => {
     if (content !== undefined) {
       updateFields.content = content;
       updateFields.size = Buffer.byteLength(content || '', 'utf-8');
+      if (content.trim().length > 30) {
+        try {
+          updateFields.summary = await summarizeDocument(filename || name || 'Document', content);
+        } catch (sumErr) {
+          console.warn('Auto-summary update warning:', sumErr.message);
+        }
+      }
     }
     if (isFavorite !== undefined) updateFields.isFavorite = isFavorite;
     if (isTrashed !== undefined) updateFields.isTrashed = isTrashed;

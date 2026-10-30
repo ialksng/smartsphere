@@ -89,15 +89,84 @@ export const summarizeDocument = async (filename, content) => {
     return 'Document is empty.';
   }
 
-  const prompt = `Please provide a concise 3-4 sentence executive summary and 3 key takeaways for the document named "${filename}":\n\n${content.slice(
+  const prompt = `Please provide a concise 2-3 sentence executive summary followed by 3 key bullet points for the document titled "${filename}":\n\n"""\n${content.slice(
     0,
     6000
-  )}`;
+  )}\n"""`;
 
   return await askGroq(
     prompt,
     [],
-    'You are an expert document summarizer. Highlight key points cleanly in Markdown.'
+    'You are an expert workspace AI. Summarize accurately, clearly, and highlight key facts in clean Markdown.'
   );
 };
+
+/**
+ * Synthesize a direct AI answer/insight for search queries across user documents
+ */
+export const answerSearchQuery = async (query, documents = []) => {
+  if (!documents || documents.length === 0) {
+    return `No documents in your workspace matched "${query}". You can ask me general questions or upload files to analyze.`;
+  }
+
+  const docSnippets = documents
+    .slice(0, 5)
+    .map(
+      (d, i) =>
+        `[Doc ${i + 1}] "${d.filename}":\nSummary: ${d.summary || 'None'}\nContent Snippet: ${(
+          d.content || ''
+        ).slice(0, 800)}`
+    )
+    .join('\n\n');
+
+  const prompt = `User search query: "${query}"\n\nRelevant workspace documents found:\n${docSnippets}\n\nTask: Based strictly on the provided documents above, provide a direct, concise 2-3 sentence answer to the user's search query, mentioning which document(s) contain the information. If the query is broad, summarize what these documents cover.`;
+
+  return await askGroq(
+    prompt,
+    [],
+    'You are the SmartSphere AI Assistant integrated into the workspace search bar. Provide fast, precise, and helpful synthesis directly answering the user query from their documents.'
+  );
+};
+
+/**
+ * Ask AI with comprehensive workspace document awareness
+ */
+export const askWithDocAwareness = async ({
+  prompt,
+  history = [],
+  activeDoc = null,
+  workspaceDocs = [],
+}) => {
+  let contextSection = '';
+
+  if (activeDoc) {
+    contextSection += `=== CURRENT ACTIVE DOCUMENT ===\nTitle: "${activeDoc.filename}"\nSummary: ${
+      activeDoc.summary || 'N/A'
+    }\nContent:\n"""\n${(activeDoc.content || '').slice(0, 7000)}\n"""\n\n`;
+  }
+
+  if (workspaceDocs && workspaceDocs.length > 0) {
+    const list = workspaceDocs
+      .filter((d) => !activeDoc || d._id.toString() !== activeDoc._id?.toString())
+      .slice(0, 10)
+      .map(
+        (d, i) =>
+          `• "${d.filename}": ${d.summary || (d.content ? d.content.slice(0, 150) + '...' : 'No summary')}`
+      )
+      .join('\n');
+
+    contextSection += `=== OTHER WORKSPACE DOCUMENTS ===\n${list}\n\n`;
+  }
+
+  const finalPrompt = contextSection
+    ? `${contextSection}User Question: ${prompt}`
+    : prompt;
+
+  return await askGroq(
+    finalPrompt,
+    history,
+    'You are the SmartSphere AI Assistant. You have deep document-awareness and context-awareness across all the user\'s workspace documents. When answering, cite specific documents by name when relevant. Provide well-formatted, professional Markdown responses.'
+  );
+};
+
 

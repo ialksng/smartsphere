@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Cloud, Bot, Loader2, Plus, Search, Star, DownloadCloud } from 'lucide-react';
+import { FileText, Cloud, Bot, Loader2, Plus, Search, Star, DownloadCloud, Sparkles, ArrowRight } from 'lucide-react';
 import apiClient from '../services/apiClient';
 
 export default function Dashboard() {
@@ -11,7 +11,9 @@ export default function Dashboard() {
   
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [aiInsight, setAiInsight] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [isAiSynthesizing, setIsAiSynthesizing] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [importingFileId, setImportingFileId] = useState(null);
 
@@ -30,24 +32,42 @@ export default function Dashboard() {
   useEffect(() => {
     if (!search.trim()) {
       setSearchResults([]);
+      setAiInsight("");
       setShowDropdown(false);
       return;
     }
 
+    const query = search.trim();
+    setShowDropdown(true);
+
     const delay = setTimeout(async () => {
       setIsSearching(true);
-      setShowDropdown(true);
       
       try {
-        const res = await apiClient.get(`/dochub/search?q=${encodeURIComponent(search)}`);
+        const res = await apiClient.get(`/dochub/search?q=${encodeURIComponent(query)}`);
         setSearchResults(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
-        console.error(err);
+        console.error('Search error:', err);
         setSearchResults([]);
       } finally {
         setIsSearching(false);
       }
-    }, 500);
+
+      // Fetch AI Insight across matching documents
+      if (query.length >= 3) {
+        setIsAiSynthesizing(true);
+        try {
+          const aiRes = await apiClient.get(`/ai/search-insight?q=${encodeURIComponent(query)}`);
+          if (aiRes.data?.answer) {
+            setAiInsight(aiRes.data.answer);
+          }
+        } catch (aiErr) {
+          console.warn('AI insight warning:', aiErr);
+        } finally {
+          setIsAiSynthesizing(false);
+        }
+      }
+    }, 400);
 
     return () => clearTimeout(delay);
   }, [search]);
@@ -165,7 +185,38 @@ export default function Dashboard() {
         />
 
         {showDropdown && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-[#0f172a] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 max-h-80 flex flex-col">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-[#0f172a] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 max-h-96 flex flex-col">
+            {/* AI WORKSPACE INSIGHT BANNER */}
+            {(aiInsight || isAiSynthesizing) && (
+              <div className="p-4 bg-gradient-to-r from-blue-950/70 via-indigo-950/70 to-slate-900 border-b border-blue-500/20">
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-blue-300">
+                    <Sparkles size={14} className={`text-blue-400 ${isAiSynthesizing ? 'animate-spin' : 'animate-pulse'}`} />
+                    <span>AI WORKSPACE SYNTHESIS</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowDropdown(false);
+                      navigate('/buddybot', { state: { prefillQuery: search } });
+                    }}
+                    className="text-[11px] text-blue-400 hover:text-white flex items-center gap-1 transition"
+                  >
+                    Open in AI Assistant <ArrowRight size={12} />
+                  </button>
+                </div>
+                {isAiSynthesizing && !aiInsight ? (
+                  <div className="text-xs text-gray-400 italic flex items-center gap-2">
+                    <Loader2 size={12} className="animate-spin" />
+                    AI scanning and analyzing documents for "{search}"...
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-200 leading-relaxed font-normal whitespace-pre-line">
+                    {aiInsight}
+                  </p>
+                )}
+              </div>
+            )}
+
             {isSearching && searchResults.length === 0 ? (
               <div className="p-4 text-center text-gray-400 text-sm flex items-center justify-center gap-2">
                 <Loader2 className="animate-spin" size={16} />

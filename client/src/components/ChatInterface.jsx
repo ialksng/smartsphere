@@ -10,17 +10,20 @@ import {
   X,
   ChevronRight,
   Folder,
+  Sparkles,
+  Globe,
 } from 'lucide-react';
 import apiClient from '../services/apiClient';
 
-export default function ChatInterface({ onInsightAdded, initialFile }) {
+export default function ChatInterface({ onInsightAdded, initialFile, prefillQuery }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Holds the hidden text of the currently active document to pass to the AI
+  // Holds the text of the currently active document to pass to the AI
   const [activeContext, setActiveContext] = useState('');
+  const [activeFileName, setActiveFileName] = useState('');
 
   // Menu States
   const [showAttachMenu, setShowAttachMenu] = useState(false);
@@ -64,6 +67,13 @@ export default function ChatInterface({ onInsightAdded, initialFile }) {
     fetchHistory();
   }, []);
 
+  // --- AUTO-FILL SEARCH QUERY ---
+  useEffect(() => {
+    if (prefillQuery && prefillQuery.trim()) {
+      setInput(prefillQuery.trim());
+    }
+  }, [prefillQuery]);
+
   // --- AUTO-LOAD PASSED INITIAL FILE ---
   useEffect(() => {
     if (initialFile) {
@@ -71,11 +81,8 @@ export default function ChatInterface({ onInsightAdded, initialFile }) {
       const content = initialFile.content || '';
       const summary = initialFile.summary || '';
 
-      setActiveContext(
-        `[Context Document Name: "${fileName}". Document Text: ${
-          content ? content.substring(0, 3000) : 'No text content'
-        }]\n\n`
-      );
+      setActiveFileName(fileName);
+      setActiveContext(content);
 
       setMessages((prev) => {
         const alreadyAdded = prev.some(
@@ -89,14 +96,14 @@ export default function ChatInterface({ onInsightAdded, initialFile }) {
             role: 'user',
             type: 'file',
             fileName: fileName,
-            text: `Attached from Storage: ${fileName}`,
+            text: `Attached: ${fileName}`,
             isSystem: true,
           },
           {
             role: 'ai',
-            text: `**Document Analyzed:** ${fileName}\n\n${
+            text: `**Document Loaded:** ${fileName}\n\n${
               summary ? '**Summary:**\n' + summary + '\n\n' : ''
-            }I'm ready! Ask me anything about this document.`,
+            }I have full context awareness of this document and can answer any specific questions about it or compare it with other workspace documents.`,
           },
         ];
       });
@@ -120,10 +127,11 @@ export default function ChatInterface({ onInsightAdded, initialFile }) {
 
     try {
       const cleanHistory = newHistory.filter((msg) => !msg.isSystem).slice(-15);
-      const contextPrefix = activeContext ? activeContext + 'User Question: ' : '';
 
       const res = await apiClient.post('/ai/chat', {
-        message: contextPrefix + input,
+        message: input,
+        docContent: activeContext,
+        fileName: activeFileName,
         history: cleanHistory,
       });
 
@@ -174,11 +182,8 @@ export default function ChatInterface({ onInsightAdded, initialFile }) {
       const data = res.data;
 
       if (data) {
-        setActiveContext(
-          `[Context Document Name: "${file.name}". Document Text: ${
-            data.text ? data.text.substring(0, 3000) : data.summary
-          }]\n\n`
-        );
+        setActiveFileName(file.name);
+        setActiveContext(data.text || data.summary || '');
 
         setMessages((prev) => [
           ...prev.slice(0, -1),
@@ -257,11 +262,8 @@ export default function ChatInterface({ onInsightAdded, initialFile }) {
       const content = fullFile.content || '';
       const summary = fullFile.summary || '';
 
-      setActiveContext(
-        `[Context Document Name: "${fullFile.filename}". Document Text: ${
-          content ? content.substring(0, 3000) : 'No text content'
-        }]\n\n`
-      );
+      setActiveFileName(fullFile.filename);
+      setActiveContext(content);
 
       setMessages((prev) => [
         ...prev,
@@ -354,11 +356,8 @@ export default function ChatInterface({ onInsightAdded, initialFile }) {
         const content = insight.content || '';
         const summary = insight.summary || '';
 
-        setActiveContext(
-          `[Context Document Name: "${file.name}". Document Text: ${
-            content ? content.substring(0, 3000) : 'No text content'
-          }]\n\n`
-        );
+        setActiveFileName(file.name);
+        setActiveContext(content);
 
         setMessages((prev) => [
           ...prev.slice(0, -1),
@@ -578,17 +577,45 @@ export default function ChatInterface({ onInsightAdded, initialFile }) {
       )}
 
       {/* Main Chat Header */}
-      <div className="p-4 border-b border-white/10 bg-white/5 flex justify-between items-center">
+      <div className="p-4 border-b border-white/10 bg-white/5 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold">AI Assistant (Groq)</h2>
-          <p className="text-xs text-gray-400">Context-Aware Document Analysis</p>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-semibold">AI Assistant (Groq)</h2>
+            <span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+              <Sparkles size={10} /> Doc-Aware
+            </span>
+          </div>
+          <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1.5">
+            <Globe size={12} className="text-emerald-400 flex-shrink-0" />
+            <span>Scanning all documents across workspace</span>
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-          </span>
-          <span className="text-xs text-emerald-400 font-medium">Online</span>
+
+        <div className="flex items-center gap-3">
+          {activeFileName && (
+            <div className="flex items-center gap-1.5 bg-blue-950/70 border border-blue-500/40 text-blue-300 text-xs px-2.5 py-1 rounded-lg">
+              <FileText size={12} />
+              <span className="truncate max-w-[130px] font-medium">{activeFileName}</span>
+              <button
+                onClick={() => {
+                  setActiveFileName('');
+                  setActiveContext('');
+                }}
+                className="hover:text-white ml-1 p-0.5 rounded-full hover:bg-white/10 transition"
+                title="Clear file focus (return to global workspace scan)"
+              >
+                <X size={12} />
+              </button>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <span className="text-xs text-emerald-400 font-medium">Online</span>
+          </div>
         </div>
       </div>
 

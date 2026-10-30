@@ -11,6 +11,7 @@ import {
   downloadDriveFile,
   uploadToDrive,
 } from '../services/googleDriveService.js';
+import { summarizeDocument } from '../services/groqService.js';
 
 const router = express.Router();
 
@@ -127,6 +128,14 @@ router.post('/google/import', async (req, res) => {
     const user = await User.findById(req.user._id);
     const driveFile = await downloadDriveFile(user, fileId);
 
+    let summary = '';
+    try {
+      summary = await summarizeDocument(fileName || driveFile.name, driveFile.content);
+    } catch (sumErr) {
+      console.warn('Drive import summary warning:', sumErr.message);
+      summary = `Imported from Google Drive: ${driveFile.name}`;
+    }
+
     const doc = await Document.create({
       userId: req.user._id,
       filename: fileName || driveFile.name,
@@ -135,7 +144,7 @@ router.post('/google/import', async (req, res) => {
       size: driveFile.size,
       cloudProvider: 'google',
       externalId: fileId,
-      summary: `Imported from Google Drive: ${driveFile.name}`,
+      summary: summary || `Imported from Google Drive: ${driveFile.name}`,
     });
 
     return res.status(201).json({ message: 'File imported successfully', file: doc, insight: doc });
