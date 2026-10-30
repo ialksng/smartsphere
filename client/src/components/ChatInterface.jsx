@@ -580,7 +580,7 @@ export default function ChatInterface({ onInsightAdded, initialFile }) {
       {/* Main Chat Header */}
       <div className="p-4 border-b border-white/10 bg-white/5 flex justify-between items-center">
         <div>
-          <h2 className="text-xl font-semibold">BuddyBot AI (Groq)</h2>
+          <h2 className="text-xl font-semibold">AI Assistant (Groq)</h2>
           <p className="text-xs text-gray-400">Context-Aware Document Analysis</p>
         </div>
         <div className="flex items-center gap-2">
@@ -712,7 +712,7 @@ export default function ChatInterface({ onInsightAdded, initialFile }) {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           disabled={isLoading || isUploading}
-          placeholder="Ask BuddyBot a question..."
+          placeholder="Ask AI Assistant a question..."
           className="flex-1 bg-black/30 border border-white/10 rounded-full px-5 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm transition placeholder-gray-500"
         />
 

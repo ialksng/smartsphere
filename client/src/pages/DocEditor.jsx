@@ -140,7 +140,7 @@ const DocEditor = () => {
       console.error(err);
       setChatHistory((prev) => [
         ...prev,
-        { role: "ai", text: "Error connecting to BuddyBot." },
+        { role: "ai", text: "Error connecting to AI Assistant." },
       ]);
     } finally {
       setChatLoading(false);
@@ -181,7 +181,7 @@ const DocEditor = () => {
                 : "bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/40"
             }`}
           >
-            <Bot size={16} /> {isBotOpen ? "Close BuddyBot" : "Ask BuddyBot"}
+            <Bot size={16} /> {isBotOpen ? "Close AI Assistant" : "Ask AI Assistant"}
           </button>
 
           {(selectedFile.source === "google_drive" ||
@@ -240,7 +240,7 @@ const DocEditor = () => {
           <div className="w-[400px] bg-[#131b2f] border border-white/10 rounded-xl flex flex-col shrink-0 shadow-2xl h-full overflow-hidden z-10 transition-all duration-300">
             <div className="p-4 border-b border-white/10 flex justify-between items-center bg-indigo-600/10 shrink-0">
               <h3 className="font-semibold flex items-center gap-2 text-indigo-400">
-                <Bot size={18} /> BuddyBot Context
+                <Bot size={18} /> AI Assistant Context
               </h3>
               <button
                 onClick={() => setIsBotOpen(false)}

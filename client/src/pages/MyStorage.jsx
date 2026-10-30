@@ -410,7 +410,7 @@ export default function MyStorage() {
                   }}
                   className="text-xs text-purple-400 text-left hover:text-purple-300 transition flex items-center gap-1"
                 >
-                  <Bot size={14} /> Send to BuddyBot
+                  <Bot size={14} /> Send to AI Assistant
                 </button>
               </div>
 

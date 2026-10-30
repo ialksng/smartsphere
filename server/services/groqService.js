@@ -16,7 +16,7 @@ export const askGroq = async (prompt, history = [], systemInstruction = '') => {
       `[AI Workspace Notice: Groq API Key is not configured yet]\n\n` +
       `Here is a simulated response for: "${prompt.slice(0, 100)}..."\n\n` +
       `To connect live ultra-fast Groq AI, add your GROQ_API_KEY (from https://console.groq.com/keys) to your Render environment variables or server/.env. ` +
-      `Once added, Groq will instantly power BuddyBot with Llama-3.3-70B!`
+      `Once added, Groq will instantly power AI Assistant with Llama-3.3-70B!`
     );
   }
 
@@ -32,7 +32,7 @@ export const askGroq = async (prompt, history = [], systemInstruction = '') => {
       formattedMessages.push({
         role: 'system',
         content:
-          'You are BuddyBot, an intelligent and helpful AI assistant for SmartSphere workspace powered by Groq. You analyze documents, assist with writing, and answer questions clearly with high speed and precision.',
+          'You are the AI Assistant, an intelligent and helpful AI assistant for SmartSphere workspace powered by Groq. You analyze documents, assist with writing, and answer questions clearly with high speed and precision.',
       });
     }
 

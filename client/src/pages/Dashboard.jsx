@@ -240,7 +240,7 @@ export default function Dashboard() {
 
         <ActionCard
           icon={<Bot />}
-          title="BuddyBot"
+          title="AI Assistant"
           desc="Chat with your files"
           onClick={() => navigate('/buddybot')}
         />

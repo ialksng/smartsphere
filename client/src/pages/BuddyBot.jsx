@@ -9,7 +9,7 @@ export default function BuddyBot() {
   return (
     <div className="flex flex-col h-full p-4 md:p-8 max-w-5xl mx-auto w-full">
       <div className="mb-6">
-        <h1 className="text-3xl font-semibold text-white">BuddyBot</h1>
+        <h1 className="text-3xl font-semibold text-white">AI Assistant</h1>
         <p className="text-gray-400 mt-2">
           Your AI assistant for documents and insights. Upload files and ask questions to get started.
         </p>

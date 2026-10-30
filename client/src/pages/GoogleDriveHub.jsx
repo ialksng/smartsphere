@@ -138,7 +138,7 @@ export default function GoogleDriveHub() {
           Google Drive
         </h1>
         <p className="text-gray-400 text-sm">
-          Import files into DocHub or chat with them in BuddyBot
+          Import files into DocHub or chat with them in AI Assistant
         </p>
       </div>
 
@@ -274,7 +274,7 @@ export default function GoogleDriveHub() {
                     <button
                       onClick={() => handleImportFile(file.id, file.name, file.mimeType, 'buddybot')}
                       className="text-gray-400 hover:text-emerald-400 transition"
-                      title="Send to BuddyBot"
+                      title="Send to AI Assistant"
                     >
                       <Bot size={16} />
                     </button>

@@ -55,10 +55,10 @@ export default function MainLayout({ children }) {
             onClick={() => navigate('/dochub')}
           />
 
-          {/* BUDDYBOT */}
+          {/* AI ASSISTANT */}
           <NavItem
             icon={<Bot size={18} />}
-            label="BuddyBot"
+            label="AI Assistant"
             onClick={() => navigate('/buddybot')}
           />
 
