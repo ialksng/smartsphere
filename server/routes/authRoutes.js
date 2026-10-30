@@ -253,9 +253,9 @@ router.get('/google', (req, res) => {
     access_type: 'offline',
     prompt: 'consent',
     scope: [
+      'openid',
       'https://www.googleapis.com/auth/userinfo.profile',
       'https://www.googleapis.com/auth/userinfo.email',
-      'https://www.googleapis.com/auth/drive.file',
     ],
   });
 
@@ -291,8 +291,10 @@ router.get('/google/callback', async (req, res) => {
     if (user) {
       if (!user.googleId) user.googleId = googleId;
       if (!user.avatar && picture) user.avatar = picture;
-      // Also save drive tokens
-      user.googleDriveTokens = tokens;
+      // Only save drive tokens if drive scope was granted
+      if (tokens.scope && tokens.scope.includes('drive')) {
+        user.googleDriveTokens = tokens;
+      }
       await user.save();
     } else {
       user = await User.create({
