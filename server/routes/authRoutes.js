@@ -1,6 +1,7 @@
 import express from 'express';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
+import mongoose from 'mongoose';
 import { google } from 'googleapis';
 import User from '../models/User.js';
 import { generateToken, protect } from '../middleware/auth.js';
@@ -17,6 +18,10 @@ const getFrontendUrl = () => {
 // @route   POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ message: 'Database is not connected. Please add MONGO_URI in Render environment variables.' });
+    }
+
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
@@ -52,6 +57,10 @@ router.post('/register', async (req, res) => {
 // @route   POST /api/auth/login
 router.post('/login', async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ message: 'Database is not connected. Please add MONGO_URI in Render environment variables.' });
+    }
+
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -267,10 +276,14 @@ router.get('/google/callback', async (req, res) => {
   const frontendUrl = getFrontendUrl();
 
   if (!code) {
-    return res.redirect(`${frontendUrl}/auth?error=google_auth_failed`);
+    return res.redirect(`${frontendUrl}/auth?error=No+authorization+code+received+from+Google`);
   }
 
   try {
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error('Database is not connected. Please add MONGO_URI to your Render environment variables.');
+    }
+
     const redirectUri =
       process.env.GOOGLE_AUTH_REDIRECT_URI ||
       'https://ialksng.me/work/projects/smartsphere/app/api/auth/google/callback';
